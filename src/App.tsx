@@ -2,7 +2,7 @@ import './App.css';
 
 import React, { useState } from 'react';
 
-import logo from './NU-N.svg';
+import logo from './NU-SE-ICON.svg';
 
 function App() {
   const [count, setCount] = useState(0);

@@ -1,8 +1,8 @@
 # Vite + React + Typescript + Eslint + Prettier: an example repo
 
-A starter for React with Typescript with the fast Vite, Vitest and all static code testing with Eslint and formatting with Prettier. As of this writing updated to React 18; and the latest versions of all tools as of April 2024.
+A starter for React with Typescript with the fast Vite, Vitest and all static code testing with Eslint and formatting with Prettier. As of this writing updated to React 18; and the latest versions of all tools as of April 2024. This was built for use by the [Northwestern University CS394 Class taught by Todd Warren](https://toddwseattle.com/blog/2024-02-05-CS394-Spring-Software-Engineering-Course/)
 
-![Vite + React + Typescript + Vitest + Eslint + Prettier](/resources/screenshot.png)
+![Vite + React + Typescript + Vitest + Eslint + Prettier](/resources/new-screenshot.png)
 
 You can find more about these in the following links: [Vite](https://vitejs.dev), [React](https://reactjs.org/), [Typescript](https://www.typescriptlang.org/), [Eslint](https://eslint.org/), [Prettier](https://prettier.io/), [Vitest](https://vitest.dev/)
 
