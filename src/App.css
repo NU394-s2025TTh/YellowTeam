@@ -61,12 +61,16 @@ button {
   color: var(--link);
 }
 
+.App-logo {
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
 @keyframes App-logo-spin {
   from {
-    transform: rotate(0deg);
+    transform: rotateY(0deg) rotateX(0deg) rotate(0deg);
   }
   to {
-    transform: rotate(360deg);
+    transform: rotateY(360deg) rotateX(360deg) rotate(360deg);
   }
 }
 

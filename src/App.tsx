@@ -2,7 +2,7 @@ import './App.css';
 
 import React, { useState } from 'react';
 
-import logo from './NU-SE-ICON.svg';
+import logo from './394-2025-Logo.svg';
 
 function App() {
   const [count, setCount] = useState(0);
@@ -14,7 +14,7 @@ function App() {
         <p className="header">
           {' '}
           🚀 Vite + React + Typescript + Vitest 🤘 & <br />
-          Eslint 🔥+ Prettier
+          Eslint 🔥+ Prettier for Wildcats
         </p>
 
         <div className="body">
