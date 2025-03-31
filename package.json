@@ -10,7 +10,8 @@
     "lint:fix": "eslint ./src --ext .jsx,.js,.ts,.tsx --quiet --fix",
     "lint:format": "prettier  --log-level warn --write \"./**/*.{js,jsx,ts,tsx,css,md,json}\" ",
     "lint": "npm run lint:format && npm run lint:fix ",
-    "type-check": "tsc"
+    "type-check": "tsc",
+    "prepare": "husky"
   },
   "dependencies": {
     "react": "^19.0.0",
@@ -32,8 +33,9 @@
     "eslint-plugin-prettier": "^5.1.3",
     "eslint-plugin-react": "^7.34.1",
     "eslint-plugin-simple-import-sort": "^12.0.0",
+    "husky": "^9.1.7",
     "jsdom": "^26.0.0",
-    "pre-commit": "^1.2.2",
+    "lint-staged": "^15.5.0",
     "prettier": "^3.2.5",
     "typescript": "^5.4.3",
     "vite": "^6.2.1",
