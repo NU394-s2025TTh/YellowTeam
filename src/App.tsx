@@ -1,7 +1,9 @@
 import './App.css';
+
 import React, { useState } from 'react';
+
+import { getData, setData } from './firebase/utils';
 import parkcity from './parkcity.jpg';
-import { setData, getData } from './firebase/utils';
 
 function App() {
   type ResortData = {
