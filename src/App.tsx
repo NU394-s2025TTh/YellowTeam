@@ -38,9 +38,10 @@ function App() {
   };
 
   const handleSearch = async () => {
+    const normalizedLocation = location.trim().toLowerCase();
     console.log(`Searching weather and slope data for: ${location}`);
 
-    if (location.toLowerCase().includes('park city')) {
+    if (normalizedLocation.includes('park city')) {
       const dummyData: ResortData = {
         name: 'Park City Mountain Resort',
         temperature: '15°F',
@@ -63,23 +64,28 @@ function App() {
         ],
       };
 
-      const wardrobeData = (await getData(
-        'users/testUser123/wardrobe',
-      )) as WardrobeData | null;
+      try {
+        const wardrobeData = (await getData(
+          'users/testUser123/wardrobe',
+        )) as WardrobeData | null;
 
-      const userOwnedGear = wardrobeData
-        ? Object.values(wardrobeData).flatMap((arr) =>
-            arr.map((item) => item.toLowerCase()),
-          )
-        : [];
+        const userOwnedGear = wardrobeData
+          ? Object.values(wardrobeData).flatMap((arr) =>
+              arr.map((item) => item.toLowerCase()),
+            )
+          : [];
 
-      const preChecked: Record<string, boolean> = {};
-      dummyData.checklist.forEach((item) => {
-        preChecked[item] = userOwnedGear.includes(item.toLowerCase());
-      });
+        const preChecked: Record<string, boolean> = {};
+        dummyData.checklist.forEach((item) => {
+          preChecked[item] = userOwnedGear.includes(item.toLowerCase());
+        });
 
-      setGearChecked(preChecked);
-      setResortData(dummyData);
+        setGearChecked(preChecked);
+        setResortData(dummyData);
+      } catch (err) {
+        console.error('Failed to load wardrobe data from Firebase:', err);
+        setResortData(dummyData); // still show resort even if wardrobe fails
+      }
     } else {
       setResortData(null);
       alert('Sorry, we only have data for Park City right now!');
