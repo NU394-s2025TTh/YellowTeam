@@ -1,11 +1,34 @@
 import './App.css';
-
 import React, { useState } from 'react';
-
 import parkcity from './parkcity.jpg';
-import { ResortData } from './types/ResortData';
+import { setData, getData } from './firebase/utils';
 
 function App() {
+  type ResortData = {
+    name: string;
+    temperature: string;
+    snowfall: string;
+    precipitation: string;
+    wind: string;
+    openLifts: number;
+    totalLifts: number;
+    trailsOpen: number;
+    totalTrails: number;
+    checklist: string[];
+  };
+
+  const gearCategories = {
+    Layering: '',
+    Accessories: '',
+    Equipment: '',
+  } as const;
+
+  type GearCategory = keyof typeof gearCategories;
+  type WardrobeData = Record<string, string[]>;
+
+  const [wardrobeInputs, setWardrobeInputs] =
+    useState<Record<GearCategory, string>>(gearCategories);
+  const [showGearInput, setShowGearInput] = useState(false);
   const [location, setLocation] = useState('');
   const [resortData, setResortData] = useState<ResortData | null>(null);
   const [gearChecked, setGearChecked] = useState<Record<string, boolean>>({});
@@ -14,11 +37,11 @@ function App() {
     setLocation(e.target.value);
   };
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     console.log(`Searching weather and slope data for: ${location}`);
 
     if (location.toLowerCase().includes('park city')) {
-      const dummyData = {
+      const dummyData: ResortData = {
         name: 'Park City Mountain Resort',
         temperature: '15°F',
         snowfall: '8 inches projected in next 24h',
@@ -40,12 +63,19 @@ function App() {
         ],
       };
 
-      // pull this from firebase instead
-      const userOwnedGear = ['Ski goggles', 'Helmet', 'Snow pants'];
+      const wardrobeData = (await getData(
+        'users/testUser123/wardrobe',
+      )) as WardrobeData | null;
+
+      const userOwnedGear = wardrobeData
+        ? Object.values(wardrobeData).flatMap((arr) =>
+            arr.map((item) => item.toLowerCase()),
+          )
+        : [];
 
       const preChecked: Record<string, boolean> = {};
       dummyData.checklist.forEach((item) => {
-        preChecked[item] = userOwnedGear.includes(item);
+        preChecked[item] = userOwnedGear.includes(item.toLowerCase());
       });
 
       setGearChecked(preChecked);
@@ -63,6 +93,26 @@ function App() {
     }));
   };
 
+  const saveWardrobe = async () => {
+    const formatted: Record<string, string[]> = {};
+
+    for (const [category, text] of Object.entries(wardrobeInputs)) {
+      formatted[category] = text
+        .split(',')
+        .map((item) => item.trim())
+        .filter((item) => item !== '');
+    }
+
+    try {
+      await setData('users/testUser123/wardrobe', formatted);
+      alert('Wardrobe saved successfully!');
+      setWardrobeInputs(gearCategories);
+    } catch (error) {
+      console.error('Error saving wardrobe:', error);
+      alert('Failed to save wardrobe. Check console for details.');
+    }
+  };
+
   return (
     <div
       className="App"
@@ -78,16 +128,55 @@ function App() {
         <p className="header">PowderPrep</p>
 
         <div className="body">
-          <input
-            type="text"
-            placeholder="Enter a location"
-            value={location}
-            onChange={handleChange}
-            className="location-input"
-          />
-          <button onClick={handleSearch} className="search-button">
-            Search
-          </button>
+          <div className="search-gear-bar">
+            <input
+              type="text"
+              placeholder="Enter a location"
+              value={location}
+              onChange={handleChange}
+              className="location-input"
+            />
+            <button onClick={handleSearch} className="search-button">
+              Search
+            </button>
+            <button
+              onClick={() => setShowGearInput((prev) => !prev)}
+              className="search-button add-gear-button"
+            >
+              {showGearInput ? 'Hide Gear Input' : 'Add Gear'}
+            </button>
+          </div>
+
+          {showGearInput && (
+            <div className="wardrobe-section">
+              <h3>Your Gear Wardrobe</h3>
+              <p>Enter the gear you own under each category (comma-separated):</p>
+              {(Object.keys(wardrobeInputs) as GearCategory[]).map((category) => (
+                <div key={category} className="wardrobe-category">
+                  <label className="wardrobe-label">{category}</label>
+                  <textarea
+                    rows={2}
+                    placeholder="e.g., Ski goggles, Helmet"
+                    value={wardrobeInputs[category]}
+                    onChange={(e) =>
+                      setWardrobeInputs((prev) => ({
+                        ...prev,
+                        [category]: e.target.value,
+                      }))
+                    }
+                    className="wardrobe-textarea"
+                  />
+                </div>
+              ))}
+              <button
+                onClick={saveWardrobe}
+                className="search-button"
+                style={{ marginTop: '1rem' }}
+              >
+                Save Gear
+              </button>
+            </div>
+          )}
 
           {resortData && (
             <div className="resort-info">
@@ -105,7 +194,7 @@ function App() {
 
               <h3>Recommended Gear Checklist:</h3>
               <ul>
-                {resortData.checklist.map((item: string, index: number) => (
+                {resortData.checklist.map((item, index) => (
                   <li key={index}>
                     <label>
                       <input

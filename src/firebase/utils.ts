@@ -1,7 +1,7 @@
 import 'firebase/database';
 
 import { initializeApp } from 'firebase/app';
-import { getDatabase, push, ref, set, update } from 'firebase/database';
+import { DatabaseReference, getDatabase, push, ref, set, update } from 'firebase/database';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyB33D08gA80Fp7ZoW6d-BvS3wpasaGC1HM',
@@ -18,6 +18,9 @@ initializeApp(firebaseConfig);
 const setData = async (path: string, data: unknown) => {
   await set(ref(getDatabase(), path), data);
 };
+const getData = async (path: string) => {
+  return await get(ref(getDatabase(), path));
+};
 
 const updateData = async (path: string, data: object) => {
   await update(ref(getDatabase(), path), data);
@@ -27,6 +30,10 @@ const pushData = async (path: string, data?: unknown) => {
   await push(ref(getDatabase(), path), data);
 };
 
-export { pushData, setData, updateData };
+export { pushData, setData, updateData, getData };
 
+
+  function get(arg0: DatabaseReference) {
+    throw new Error('Function not implemented.');
+  }
 //testing

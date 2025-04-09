@@ -123,3 +123,47 @@ body {
     transform: rotateY(360deg) rotateX(360deg) rotate(360deg);
   }
 }
+.search-gear-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+  width: 100%;
+  max-width: 600px;
+}
+
+.add-gear-button {
+  margin-left: auto;
+}
+
+.wardrobe-section {
+  margin-top: 2rem;
+  background: white;
+  padding: 1.5rem 2rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  color: var(--primary);
+  width: 100%;
+  max-width: 600px;
+  text-align: left;
+}
+
+.wardrobe-category {
+  margin-bottom: 1rem;
+}
+
+.wardrobe-label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 0.3rem;
+}
+
+.wardrobe-textarea {
+  width: 100%;
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  resize: vertical;
+}
