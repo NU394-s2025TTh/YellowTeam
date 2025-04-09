@@ -3,21 +3,9 @@ import './App.css';
 import React, { useState } from 'react';
 
 import parkcity from './parkcity.jpg';
+import { ResortData } from './types/ResortData';
 
 function App() {
-  type ResortData = {
-    name: string;
-    temperature: string;
-    snowfall: string;
-    precipitation: string;
-    wind: string;
-    openLifts: number;
-    totalLifts: number;
-    trailsOpen: number;
-    totalTrails: number;
-    checklist: string[];
-  };
-
   const [location, setLocation] = useState('');
   const [resortData, setResortData] = useState<ResortData | null>(null);
   const [gearChecked, setGearChecked] = useState<Record<string, boolean>>({});
