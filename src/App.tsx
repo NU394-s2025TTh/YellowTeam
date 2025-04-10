@@ -1,22 +1,13 @@
 import './App.css';
+
 import React, { useEffect, useState } from 'react';
+
+import { getResortData } from './firebase/user';
 import { getData, setData } from './firebase/utils';
 import parkcity from './parkcity.jpg';
+import { ResortData } from './types/ResortData';
 
 function App() {
-  type ResortData = {
-    name: string;
-    temperature: string;
-    snowfall: string;
-    precipitation: string;
-    wind: string;
-    openLifts: number;
-    totalLifts: number;
-    trailsOpen: number;
-    totalTrails: number;
-    checklist: string[];
-  };
-
   const gearCategories = {
     Layering: '',
     Accessories: '',
@@ -41,28 +32,13 @@ function App() {
     const normalizedLocation = location.trim().toLowerCase();
     console.log(`Searching weather and slope data for: ${location}`);
 
-    if (normalizedLocation.includes('park city')) {
-      const dummyData: ResortData = {
-        name: 'Park City Mountain Resort',
-        temperature: '15°F',
-        snowfall: '8 inches projected in next 24h',
-        precipitation: '90% chance',
-        wind: '12 mph',
-        openLifts: 14,
-        totalLifts: 16,
-        trailsOpen: 85,
-        totalTrails: 120,
-        checklist: [
-          'Warm waterproof jacket',
-          'Snow pants',
-          'Thermal base layers',
-          'Ski goggles',
-          'Hand warmers',
-          'Waterproof gloves',
-          'Helmet',
-          'Sunscreen (yes, even in the snow!)',
-        ],
-      };
+    const skiLocations = await getResortData();
+    const returnedData = skiLocations.find((array) =>
+      array[0].includes(normalizedLocation),
+    );
+
+    if (returnedData) {
+      const dummyData = returnedData[1];
 
       try {
         const userData = await getData('users/testUser123/wardrobe');
@@ -85,7 +61,7 @@ function App() {
       }
     } else {
       setResortData(null);
-      alert('Sorry, we only have data for Park City right now!');
+      alert('Sorry, we could not find that location!');
     }
   };
 
@@ -132,6 +108,8 @@ function App() {
         .map((item) => item.trim())
         .filter((item) => item !== '');
     }
+
+    console.log(formatted);
 
     try {
       await setData('users/testUser123/wardrobe', formatted);
