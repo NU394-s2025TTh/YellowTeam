@@ -1,7 +1,7 @@
 import 'firebase/database';
 
 import { initializeApp } from 'firebase/app';
-import { DatabaseReference, getDatabase, push, ref, set, update } from 'firebase/database';
+import { get, getDatabase, push, ref, set, update } from 'firebase/database';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyB33D08gA80Fp7ZoW6d-BvS3wpasaGC1HM',
@@ -30,10 +30,4 @@ const pushData = async (path: string, data?: unknown) => {
   await push(ref(getDatabase(), path), data);
 };
 
-export { pushData, setData, updateData, getData };
-
-
-  function get(arg0: DatabaseReference) {
-    throw new Error('Function not implemented.');
-  }
-//testing
+export { getData, pushData, setData, updateData };
