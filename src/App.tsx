@@ -26,7 +26,6 @@ function App() {
   } as const;
 
   type GearCategory = keyof typeof gearCategories;
-  type WardrobeData = Record<string, string[]>;
 
   const [wardrobeInputs, setWardrobeInputs] =
     useState<Record<GearCategory, string>>(gearCategories);
@@ -67,14 +66,11 @@ function App() {
       };
 
       try {
-        const wardrobeData = (await getData(
-          'users/testUser123/wardrobe',
-        )) as WardrobeData | null;
+        const userData = await getData('users/testUser123/wardrobe');
+        const wardrobeData: string[][] = Object.values(userData.val());
 
         const userOwnedGear = wardrobeData
-          ? Object.values(wardrobeData).flatMap((arr) =>
-              arr.map((item) => item.toLowerCase()),
-            )
+          ? wardrobeData.flatMap((arr) => arr.map((item) => item.toLowerCase()))
           : [];
 
         const preChecked: Record<string, boolean> = {};
