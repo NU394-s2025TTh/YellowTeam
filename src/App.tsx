@@ -1,7 +1,5 @@
 import './App.css';
-
-import React, { useState } from 'react';
-
+import React, { useEffect, useState } from 'react';
 import { getData, setData } from './firebase/utils';
 import parkcity from './parkcity.jpg';
 
@@ -30,6 +28,7 @@ function App() {
   const [wardrobeInputs, setWardrobeInputs] =
     useState<Record<GearCategory, string>>(gearCategories);
   const [showGearInput, setShowGearInput] = useState(false);
+  const [isEditingWardrobe, setIsEditingWardrobe] = useState(false);
   const [location, setLocation] = useState('');
   const [resortData, setResortData] = useState<ResortData | null>(null);
   const [gearChecked, setGearChecked] = useState<Record<string, boolean>>({});
@@ -82,7 +81,7 @@ function App() {
         setResortData(dummyData);
       } catch (err) {
         console.error('Failed to load wardrobe data from Firebase:', err);
-        setResortData(dummyData); // still show resort even if wardrobe fails
+        setResortData(dummyData); // fallback
       }
     } else {
       setResortData(null);
@@ -96,7 +95,34 @@ function App() {
       [item]: !prev[item],
     }));
   };
+  useEffect(() => {
+    const loadWardrobe = async () => {
+      if (showGearInput) {
+        try {
+          const snapshot = await getData('users/testUser123/wardrobe');
+          const wardrobeData = snapshot.val();
 
+          if (wardrobeData) {
+            const formattedInputs: Record<GearCategory, string> = {
+              Layering: '',
+              Accessories: '',
+              Equipment: '',
+            };
+
+            (Object.keys(wardrobeData) as GearCategory[]).forEach((category) => {
+              formattedInputs[category] = wardrobeData[category].join(', ');
+            });
+
+            setWardrobeInputs(formattedInputs);
+          }
+        } catch (error) {
+          console.error('Error loading wardrobe data:', error);
+        }
+      }
+    };
+
+    loadWardrobe();
+  }, [showGearInput]);
   const saveWardrobe = async () => {
     const formatted: Record<string, string[]> = {};
 
@@ -111,6 +137,7 @@ function App() {
       await setData('users/testUser123/wardrobe', formatted);
       alert('Wardrobe saved successfully!');
       setWardrobeInputs(gearCategories);
+      setIsEditingWardrobe(false);
     } catch (error) {
       console.error('Error saving wardrobe:', error);
       alert('Failed to save wardrobe. Check console for details.');
@@ -144,41 +171,73 @@ function App() {
               Search
             </button>
             <button
-              onClick={() => setShowGearInput((prev) => !prev)}
+              onClick={() => {
+                setShowGearInput((prev) => !prev);
+                setIsEditingWardrobe(false); // reset to view mode
+              }}
               className="search-button add-gear-button"
             >
-              {showGearInput ? 'Hide Gear Input' : 'Add Gear'}
+              {showGearInput ? 'Hide Wardrobe' : 'My Wardrobe'}
             </button>
           </div>
 
           {showGearInput && (
             <div className="wardrobe-section">
               <h3>Your Gear Wardrobe</h3>
-              <p>Enter the gear you own under each category (comma-separated):</p>
-              {(Object.keys(wardrobeInputs) as GearCategory[]).map((category) => (
-                <div key={category} className="wardrobe-category">
-                  <label className="wardrobe-label">{category}</label>
-                  <textarea
-                    rows={2}
-                    placeholder="e.g., Ski goggles, Helmet"
-                    value={wardrobeInputs[category]}
-                    onChange={(e) =>
-                      setWardrobeInputs((prev) => ({
-                        ...prev,
-                        [category]: e.target.value,
-                      }))
-                    }
-                    className="wardrobe-textarea"
-                  />
-                </div>
-              ))}
-              <button
-                onClick={saveWardrobe}
-                className="search-button"
-                style={{ marginTop: '1rem' }}
-              >
-                Save Gear
-              </button>
+
+              {!isEditingWardrobe ? (
+                <>
+                  {Object.entries(wardrobeInputs).map(([category, items]) => (
+                    <div key={category} className="wardrobe-category">
+                      <strong>{category}</strong>
+                      <ul style={{ paddingLeft: '1rem' }}>
+                        {items
+                          .split(',')
+                          .map((item) => item.trim())
+                          .filter((item) => item)
+                          .map((item, idx) => (
+                            <li key={idx}> {item}</li>
+                          ))}
+                      </ul>
+                    </div>
+                  ))}
+                  <button
+                    onClick={() => setIsEditingWardrobe(true)}
+                    className="search-button"
+                    style={{ marginTop: '1rem' }}
+                  >
+                    Edit Wardrobe
+                  </button>
+                </>
+              ) : (
+                <>
+                  <p>Enter the gear you own under each category (comma-separated):</p>
+                  {(Object.keys(wardrobeInputs) as GearCategory[]).map((category) => (
+                    <div key={category} className="wardrobe-category">
+                      <label className="wardrobe-label">{category}</label>
+                      <textarea
+                        rows={2}
+                        placeholder="e.g., Ski goggles, Helmet"
+                        value={wardrobeInputs[category]}
+                        onChange={(e) =>
+                          setWardrobeInputs((prev) => ({
+                            ...prev,
+                            [category]: e.target.value,
+                          }))
+                        }
+                        className="wardrobe-textarea"
+                      />
+                    </div>
+                  ))}
+                  <button
+                    onClick={saveWardrobe}
+                    className="search-button"
+                    style={{ marginTop: '1rem' }}
+                  >
+                    Save Wardrobe
+                  </button>
+                </>
+              )}
             </div>
           )}
 
