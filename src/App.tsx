@@ -1,5 +1,7 @@
 import './App.css';
+
 import React, { useEffect, useState } from 'react';
+
 import { getData, setData } from './firebase/utils';
 import parkcity from './parkcity.jpg';
 

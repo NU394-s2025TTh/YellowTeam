@@ -10,3 +10,11 @@ export type ResortData = {
   totalTrails: number;
   checklist: string[];
 };
+
+export const gearCategories = {
+  Layering: '',
+  Accessories: '',
+  Equipment: '',
+} as const;
+
+export type GearCategory = keyof typeof gearCategories;
