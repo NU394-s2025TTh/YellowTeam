@@ -1,0 +1,51 @@
+.wardrobe-section {
+  margin-top: 2rem;
+  background: white;
+  padding: 1.5rem 2rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: left;
+}
+
+.wardrobe-category {
+  margin-bottom: 1rem;
+}
+
+.wardrobe-category ul {
+  list-style: disc;
+  padding-left: 1.2rem;
+}
+
+.wardrobe-label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 0.3rem;
+}
+
+.wardrobe-textarea {
+  width: 100%;
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  resize: vertical;
+}
+
+.search-button {
+  outline: none;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  background: var(--button);
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  margin-top: 1rem;
+}
+
+.search-button:hover {
+  background: var(--button-hover);
+}
