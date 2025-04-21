@@ -261,29 +261,43 @@ function App() {
         )}
 
         {resortData && (
-          <div className="resort-info">
-            <h2>{resortData.name}</h2>
-            <p>❄️ Top Snow Depth: {resortData.topSnowDepth}</p>
-            <p>❄️ Bottom Snow Depth: {resortData.botSnowDepth}</p>
-            <p>📅 Last Snowfall: {resortData.lastSnowfallDate}</p>
-            <a href={resortData.url} target="_blank" rel="noreferrer">
-              🔗 View Full Forecast
-            </a>
-            <h3 style={{ marginTop: '1.5rem' }}>Recommended Gear Checklist:</h3>
-            <ul>
-              {Object.keys(gearChecked).map((item, index) => (
-                <li key={index}>
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={gearChecked[item]}
-                      onChange={() => toggleCheckbox(item)}
-                    />
-                    {item}
-                  </label>
-                </li>
-              ))}
-            </ul>
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '1.5rem',
+              justifyContent: 'center',
+            }}
+          >
+            {/* Resort Info */}
+            <div className="resort-info">
+              <h2>{resortData.name}</h2>
+              <p>❄️ Top Snow Depth: {resortData.topSnowDepth}</p>
+              <p>❄️ Bottom Snow Depth: {resortData.botSnowDepth}</p>
+              <p>📅 Last Snowfall: {resortData.lastSnowfallDate}</p>
+              <a href={resortData.url} target="_blank" rel="noreferrer">
+                🔗 View Full Forecast
+              </a>
+            </div>
+
+            {/* Checklist */}
+            <div className="resort-info">
+              <h3>Recommended Gear Checklist:</h3>
+              <ul>
+                {Object.keys(gearChecked).map((item, index) => (
+                  <li key={index}>
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={gearChecked[item]}
+                        onChange={() => toggleCheckbox(item)}
+                      />
+                      {item}
+                    </label>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         )}
 
