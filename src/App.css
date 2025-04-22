@@ -1,10 +1,10 @@
 :root {
-  --primary: #0f1c2e; /* Deep navy for text */
-  --bg-primary: #f9fafe; /* Clean snowy white background */
-  --accent: #4c9fda; /* Cool blue accent */
-  --button: #3b82f6; /* Bright sky blue */
-  --button-hover: #2563eb; /* Slightly deeper blue */
-  --text-light: #5a6b84; /* Light grayish text */
+  --primary: #0f1c2e;
+  --bg-primary: #f9fafe;
+  --accent: #4c9fda;
+  --button: #3b82f6;
+  --button-hover: #2563eb;
+  --text-light: #5a6b84;
 }
 
 body {
@@ -21,154 +21,14 @@ body {
   background-color: rgba(255, 255, 255, 0.75);
   backdrop-filter: blur(4px);
   border-radius: 16px;
-  margin: 2rem;
+  margin: 2rem auto;
   padding: 2rem;
   color: var(--primary);
-}
-
-.App-logo {
-  height: 120px;
-  margin-bottom: 1rem;
-  animation: App-logo-spin infinite 20s linear;
+  max-width: 1400px;
 }
 
 .header {
   font-size: 3rem;
   font-weight: bold;
   margin-bottom: 1.5rem;
-}
-
-.body {
-  font-size: 1rem;
-  width: 100%;
-  max-width: 600px;
-}
-
-/* 🔧 Updated input */
-.location-input {
-  padding: 12px 18px;
-  font-size: 1rem;
-  border: 2px solid var(--accent);
-  border-radius: 8px;
-  background: white;
-  color: var(--primary);
-  width: auto;
-  flex: 1;
-  min-width: 180px;
-}
-
-/* 🔧 Ensure buttons don't wrap text */
-.search-button {
-  outline: none;
-  border: none;
-  border-radius: 8px;
-  padding: 12px 24px;
-  background: var(--button);
-  color: white;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background 0.3s ease;
-  white-space: nowrap;
-}
-
-.search-button:hover {
-  background: var(--button-hover);
-}
-
-/* 🔧 Align input + buttons horizontally */
-.search-gear-bar {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-top: 1rem;
-  width: 100%;
-  max-width: 600px;
-}
-
-.add-gear-button {
-  margin-left: auto;
-}
-
-.resort-info {
-  text-align: left;
-  margin-top: 2rem;
-  background: white;
-  padding: 1.5rem 2rem;
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  color: var(--primary);
-  width: 100%;
-  max-width: 600px;
-}
-
-.resort-info h2 {
-  margin-bottom: 1rem;
-}
-
-.resort-info p {
-  margin: 0.3rem 0;
-}
-
-.resort-info h3 {
-  margin-top: 1.5rem;
-  margin-bottom: 0.5rem;
-}
-
-.resort-info ul {
-  list-style: none;
-  padding: 0;
-}
-
-.resort-info li {
-  display: flex;
-  align-items: center;
-  margin-bottom: 0.4rem;
-  font-size: 0.95rem;
-}
-
-.resort-info input[type='checkbox'] {
-  margin-right: 0.75rem;
-  transform: scale(1.2);
-  accent-color: var(--accent);
-}
-
-.wardrobe-section {
-  margin-top: 2rem;
-  background: white;
-  padding: 1.5rem 2rem;
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  color: var(--primary);
-  width: 100%;
-  max-width: 600px;
-  text-align: left;
-}
-
-.wardrobe-category {
-  margin-bottom: 1rem;
-}
-
-.wardrobe-label {
-  font-weight: bold;
-  display: block;
-  margin-bottom: 0.3rem;
-}
-
-.wardrobe-textarea {
-  width: 100%;
-  padding: 0.5rem;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  resize: vertical;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotateY(0deg) rotateX(0deg) rotate(0deg);
-  }
-  to {
-    transform: rotateY(360deg) rotateX(360deg) rotate(360deg);
-  }
 }

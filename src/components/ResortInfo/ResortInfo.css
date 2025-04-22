@@ -1,0 +1,44 @@
+.resort-info {
+  background: white;
+  padding: 1.5rem 2rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  color: var(--primary);
+  text-align: left;
+  margin-top: 2rem;
+}
+
+.resort-info h2 {
+  margin-bottom: 1rem;
+}
+
+.resort-info p {
+  margin: 0.3rem 0;
+}
+
+.resort-info a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.resort-info a:hover {
+  text-decoration: underline;
+}
+
+.resort-info ul {
+  list-style: none;
+  padding: 0;
+}
+
+.resort-info li {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.4rem;
+  font-size: 0.95rem;
+}
+
+.resort-info input[type='checkbox'] {
+  margin-right: 0.75rem;
+  transform: scale(1.2);
+  accent-color: var(--accent);
+}
