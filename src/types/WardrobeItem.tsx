@@ -1,4 +1,4 @@
-export type GearCategory = 'Layering' | 'Accessories' | 'Equipment';
+export type GearCategory = 'Base Layers' | 'Mid Layers' | 'Outer Layers' | 'Accessories';
 
 export type WardrobeItem = {
   name: string;

@@ -7,7 +7,12 @@ import { GearCategory, WardrobeItem } from 'src/types/WardrobeItem';
 
 import { getData } from '../../firebase/utils';
 
-const categories: GearCategory[] = ['Layering', 'Accessories', 'Equipment'];
+const categories: GearCategory[] = [
+  'Base Layers',
+  'Mid Layers',
+  'Outer Layers',
+  'Accessories',
+];
 
 export default function Wardrobe() {
   const { items, setItems } = useWardrobeContext();
@@ -34,9 +39,12 @@ export default function Wardrobe() {
 
   const handleAdd = () => {
     const name = newItem.name.trim();
+    const warmth = newItem.warmth;
+    const category = newItem.category;
+
     if (!name) return;
-    setItems((prev) => [...prev, { name, category: categories[0], warmth: 0 }]);
-    setNewItem({ ...newItem, name: name });
+    setItems((prev) => [...prev, { name, category, warmth }]);
+    setNewItem({ ...newItem });
   };
 
   const updateItem = (
@@ -64,13 +72,29 @@ export default function Wardrobe() {
           max={MAX_INPUT}
           onChange={(inputVal) => setNewItem({ ...newItem, name: inputVal.target.value })}
         />
-        <select name="item" id="item-category">
-          <option value="baseLayers">Base Layers</option>
-          <option value="midLayers">Mid Layers</option>
-          <option value="outerLayer">Outer Layer</option>
-          <option value="accessories">Accessories</option>
+        <select
+          name="item"
+          id="item-category"
+          onChange={(category) => {
+            setNewItem({ ...newItem, category: category.target.value as GearCategory });
+            console.log(category.target.value);
+          }}
+        >
+          <option value="Base Layers">Base Layers</option>
+          <option value="Mid Layers">Mid Layers</option>
+          <option value="Outer Layers">Outer Layers</option>
+          <option value="Accessories">Accessories</option>
         </select>
-        <input type="range" id="warmth" min={0} max={5} step={1}></input>
+        <input
+          type="range"
+          id="warmth"
+          min={0}
+          max={5}
+          step={1}
+          onChange={(warmthVal) =>
+            setNewItem({ ...newItem, warmth: Number(warmthVal.target.value) })
+          }
+        />
         <button onClick={handleAdd}>Add</button>
       </div>
       <div className="inventory-section">
@@ -95,7 +119,9 @@ export default function Wardrobe() {
               min={0}
               max={10}
               value={item.warmth}
-              onChange={(e) => updateItem(idx, { warmth: Number(e.target.value) })}
+              onChange={(warmth) =>
+                updateItem(idx, { warmth: Number(warmth.target.value) })
+              }
             />
             <button
               className="remove-button"
