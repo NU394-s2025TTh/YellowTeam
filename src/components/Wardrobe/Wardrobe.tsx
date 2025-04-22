@@ -1,3 +1,4 @@
+// src/components/Wardrobe/Wardrobe.tsx
 import './Wardrobe.css';
 
 import React, { useEffect, useState } from 'react';
@@ -17,34 +18,36 @@ const categories: GearCategory[] = [
 export default function Wardrobe() {
   const { items, setItems } = useWardrobeContext();
 
+  // start newItem from your default
   const [newItem, setNewItem] = useState<WardrobeItem>(DEFAULT_ITEM);
 
+  // load existing from Firebase
   useEffect(() => {
     (async () => {
       try {
-        const wardrobeSnapshot = await getData('users/testUser123/wardrobe');
-        const saved: Record<GearCategory, string[]> = wardrobeSnapshot.val() || {};
+        const snap = await getData('users/testUser123/wardrobe');
+        const saved: Record<GearCategory, string[]> = snap.val() || {};
         const loaded: WardrobeItem[] = [];
         categories.forEach((cat) => {
           (saved[cat] || []).forEach((name) => {
-            loaded.push({ name, category: cat, warmth: 0 });
+            loaded.push({ name, category: cat, warmth: 3 });
+            // default saved items to mid‑warmth
           });
         });
         setItems(loaded);
       } catch {
-        // ignore if no data
+        /* ignore */
       }
     })();
-  }, []);
+  }, [setItems]);
 
   const handleAdd = () => {
     const name = newItem.name.trim();
-    const warmth = newItem.warmth;
-    const category = newItem.category;
-
     if (!name) return;
-    setItems((prev) => [...prev, { name, category, warmth }]);
-    setNewItem({ ...newItem });
+    // push the exact newItem object (with its category & warmth)
+    setItems((prev) => [...prev, newItem]);
+    // reset back to defaults
+    setNewItem({ ...DEFAULT_ITEM });
   };
 
   const updateItem = (
@@ -59,49 +62,65 @@ export default function Wardrobe() {
   };
 
   const handleGenerateReport = () => {
-    // TODO: hook up report generation
+    // TODO
   };
 
   return (
     <div className="wardrobe-page">
+      {/* ─── Add new item */}
       <div className="wardrobe-input">
         <input
           type="text"
           placeholder="Item Name"
+          maxLength={MAX_INPUT}
           value={newItem.name}
-          max={MAX_INPUT}
-          onChange={(inputVal) => setNewItem({ ...newItem, name: inputVal.target.value })}
+          onChange={(e) => setNewItem((prev) => ({ ...prev, name: e.target.value }))}
         />
+
         <select
-          name="item"
-          id="item-category"
-          onChange={(category) => {
-            setNewItem({ ...newItem, category: category.target.value as GearCategory });
-            console.log(category.target.value);
-          }}
-        >
-          <option value="Base Layers">Base Layers</option>
-          <option value="Mid Layers">Mid Layers</option>
-          <option value="Outer Layers">Outer Layers</option>
-          <option value="Accessories">Accessories</option>
-        </select>
-        <input
-          type="range"
-          id="warmth"
-          min={0}
-          max={5}
-          step={1}
-          onChange={(warmthVal) =>
-            setNewItem({ ...newItem, warmth: Number(warmthVal.target.value) })
+          value={newItem.category}
+          onChange={(e) =>
+            setNewItem((prev) => ({
+              ...prev,
+              category: e.target.value as GearCategory,
+            }))
           }
-        />
+        >
+          {categories.map((cat) => (
+            <option key={cat} value={cat}>
+              {cat}
+            </option>
+          ))}
+        </select>
+
+        <div className="slider-wrapper">
+          <label htmlFor="warmth">Warmth Level (1–5)</label>
+          <input
+            type="range"
+            id="warmth"
+            min={1}
+            max={5}
+            step={1}
+            value={newItem.warmth}
+            onChange={(e) =>
+              setNewItem((prev) => ({
+                ...prev,
+                warmth: Number(e.target.value),
+              }))
+            }
+          />
+        </div>
+
         <button onClick={handleAdd}>Add</button>
       </div>
+
+      {/* ─── Inventory */}
       <div className="inventory-section">
         <h3>Inventory</h3>
         {items.map((item, idx) => (
           <div className="inventory-item" key={idx}>
             <input type="text" value={item.name} readOnly />
+
             <select
               value={item.category}
               onChange={(e) =>
@@ -114,15 +133,15 @@ export default function Wardrobe() {
                 </option>
               ))}
             </select>
+
             <input
               type="number"
-              min={0}
-              max={10}
+              min={1}
+              max={5}
               value={item.warmth}
-              onChange={(warmth) =>
-                updateItem(idx, { warmth: Number(warmth.target.value) })
-              }
+              onChange={(e) => updateItem(idx, { warmth: Number(e.target.value) })}
             />
+
             <button
               className="remove-button"
               onClick={() => removeItem(idx)}
@@ -134,7 +153,7 @@ export default function Wardrobe() {
         ))}
       </div>
 
-      {/* 3) Generate report */}
+      {/* ─── Generate report */}
       <button className="generate-button" onClick={handleGenerateReport}>
         Generate My Packing Report
       </button>
