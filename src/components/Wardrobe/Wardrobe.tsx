@@ -1,30 +1,25 @@
 import './Wardrobe.css';
 
 import React, { useEffect, useState } from 'react';
+import { DEFAULT_ITEM, MAX_INPUT } from 'src/constants/wardrobeValues';
+import { useWardrobeContext } from 'src/providers/WardrobeProvider';
+import { GearCategory, WardrobeItem } from 'src/types/WardrobeItem';
 
 import { getData } from '../../firebase/utils';
 
-type GearCategory = 'Layering' | 'Accessories' | 'Equipment';
 const categories: GearCategory[] = ['Layering', 'Accessories', 'Equipment'];
 
-interface Item {
-  name: string;
-  category: GearCategory;
-  warmth: number;
-}
-
-const MAX_INPUT = 5;
-
 export default function Wardrobe() {
-  const [items, setItems] = useState<Item[]>([]);
-  const [newItemName, setNewItemName] = useState('');
+  const { items, setItems } = useWardrobeContext();
+
+  const [newItem, setNewItem] = useState<WardrobeItem>(DEFAULT_ITEM);
 
   useEffect(() => {
     (async () => {
       try {
         const wardrobeSnapshot = await getData('users/testUser123/wardrobe');
         const saved: Record<GearCategory, string[]> = wardrobeSnapshot.val() || {};
-        const loaded: Item[] = [];
+        const loaded: WardrobeItem[] = [];
         categories.forEach((cat) => {
           (saved[cat] || []).forEach((name) => {
             loaded.push({ name, category: cat, warmth: 0 });
@@ -38,15 +33,15 @@ export default function Wardrobe() {
   }, []);
 
   const handleAdd = () => {
-    const name = newItemName.trim();
+    const name = newItem.name.trim();
     if (!name) return;
     setItems((prev) => [...prev, { name, category: categories[0], warmth: 0 }]);
-    setNewItemName('');
+    setNewItem({ ...newItem, name: name });
   };
 
   const updateItem = (
     index: number,
-    updates: Partial<Pick<Item, 'category' | 'warmth'>>,
+    updates: Partial<Pick<WardrobeItem, 'category' | 'warmth'>>,
   ) => {
     setItems((prev) => prev.map((it, i) => (i === index ? { ...it, ...updates } : it)));
   };
@@ -61,14 +56,13 @@ export default function Wardrobe() {
 
   return (
     <div className="wardrobe-page">
-      {/* 1) Input + Add button */}
       <div className="wardrobe-input">
         <input
           type="text"
           placeholder="Item Name"
-          value={newItemName}
+          value={newItem.name}
           max={MAX_INPUT}
-          onChange={(e) => setNewItemName(e.target.value)}
+          onChange={(inputVal) => setNewItem({ ...newItem, name: inputVal.target.value })}
         />
         <select name="item" id="item-category">
           <option value="baseLayers">Base Layers</option>
@@ -79,8 +73,6 @@ export default function Wardrobe() {
         <input type="range" id="warmth" min={0} max={5} step={1}></input>
         <button onClick={handleAdd}>Add</button>
       </div>
-
-      {/* 2) Inventory list */}
       <div className="inventory-section">
         <h3>Inventory</h3>
         {items.map((item, idx) => (

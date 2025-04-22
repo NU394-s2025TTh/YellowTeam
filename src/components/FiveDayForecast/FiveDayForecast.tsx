@@ -1,7 +1,7 @@
 import './FiveDayForecast.css';
 
 import React from 'react';
-import { Forecast } from 'types/Forecast';
+import { Forecast } from 'src/types/Forecast';
 
 interface Props {
   days: Forecast[];
