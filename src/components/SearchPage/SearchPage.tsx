@@ -1,18 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import SearchBar from '../SearchBar/SearchBar';
-import ResortInfo from '../ResortInfo/ResortInfo';
-import HourlyForecast from '../HourlyForecast/HourlyForecast';
-import FiveDayForecast from '../FiveDayForecast/FiveDayForecast';
-import TempChart from '../TempChart/TempChart';
-
 import { useNavigate } from 'react-router-dom';
 
 import {
   getData,
-  getSnowConditions,
-  getHourlyForecast,
   getFiveDayForecast,
+  getHourlyForecast,
+  getSnowConditions,
 } from '../../firebase/utils';
+import type { Forecast } from '../../types/Forecast';
+import { FiveDayForecast } from '../FiveDayForecast/FiveDayForecast';
+import HourlyForecast from '../HourlyForecast/HourlyForecast';
+import ResortInfo from '../ResortInfo/ResortInfo';
+import SearchBar from '../SearchBar/SearchBar';
+import TempChart from '../TempChart/TempChart';
 
 // type GearCategory = 'Layering' | 'Accessories' | 'Equipment';
 
@@ -25,26 +25,29 @@ type SnowConditionData = {
 };
 
 const SearchPage: React.FC = () => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const [location, setLocation] = useState('');
   const [resortData, setResortData] = useState<SnowConditionData | null>(null);
-  const [forecastList, setForecastList] = useState<any[]>([]);
-  const [fiveDayForecast, setFiveDayForecast] = useState<any[]>([]);
+  const [forecastList, setForecastList] = useState([]);
+  const [fiveDayForecast, setFiveDayForecast] = useState<Forecast[]>([]);
   const [chartData, setChartData] = useState<
     { day: string; maxTemp: number; minTemp: number }[]
   >([]);
   const [gearChecked, setGearChecked] = useState<Record<string, boolean>>({});
-  const [loading, setLoading] = useState(false);
-  const [showGearInput, setShowGearInput] = useState(false);
+  const [isLoading, setLoading] = useState<boolean>(false);
+  const [showGearInput] = useState(false);
+
+  // REMOVE LATER
+  console.log(isLoading);
 
   useEffect(() => {
     setChartData(
-      fiveDayForecast.map((day) => ({
+      fiveDayForecast.map((day: Forecast) => ({
         day: day.dayOfWeek,
         maxTemp: parseInt(day.am?.maxTemp.replace(/[^0-9]/g, '') || '0'),
         minTemp: parseInt(day.am?.minTemp.replace(/[^0-9]/g, '') || '0'),
-      }))
+      })),
     );
   }, [fiveDayForecast]);
 

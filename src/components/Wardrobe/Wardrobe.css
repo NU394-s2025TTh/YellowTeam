@@ -1,51 +1,88 @@
-.wardrobe-section {
-  margin-top: 2rem;
-  background: white;
-  padding: 1.5rem 2rem;
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
-  text-align: left;
+/* Container */
+.wardrobe-page {
+  padding: 2rem;
+  max-width: 700px;
+  margin: 0 auto;
 }
 
-.wardrobe-category {
+/* Input row */
+.wardrobe-input {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.wardrobe-input input {
+  flex: 1;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+}
+
+.wardrobe-input button {
+  padding: 0.5rem 1.5rem;
+  border: none;
+  background: var(--button);
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* Inventory box */
+.inventory-section {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  margin-bottom: 1.5rem;
+}
+
+.inventory-section h3 {
+  margin-top: 0;
   margin-bottom: 1rem;
 }
 
-.wardrobe-category ul {
-  list-style: disc;
-  padding-left: 1.2rem;
+/* Each row */
+.inventory-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
 }
 
-.wardrobe-label {
-  font-weight: bold;
-  display: block;
-  margin-bottom: 0.3rem;
-}
-
-.wardrobe-textarea {
-  width: 100%;
+.inventory-item input[type='text'] {
+  flex: 1;
   padding: 0.5rem;
-  border-radius: 8px;
   border: 1px solid #ccc;
-  resize: vertical;
+  border-radius: 8px;
 }
 
-.search-button {
-  outline: none;
-  border: none;
+.inventory-item select,
+.inventory-item input[type='number'] {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
   border-radius: 8px;
-  padding: 12px 24px;
+  width: 120px;
+}
+
+.inventory-item .remove-button {
+  background: transparent;
+  border: none;
+  font-size: 1.3rem;
+  color: var(--accent);
+  cursor: pointer;
+  margin-left: auto;
+}
+
+/* Generate report button */
+.generate-button {
+  display: block;
+  margin: 0 auto 1.5rem;
+  padding: 0.75rem 2rem;
   background: var(--button);
   color: white;
-  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
   cursor: pointer;
-  transition: background 0.3s ease;
-  margin-top: 1rem;
-}
-
-.search-button:hover {
-  background: var(--button-hover);
 }

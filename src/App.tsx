@@ -3,7 +3,7 @@
 import './App.css';
 
 import React from 'react';
-import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
+import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 
 import Home from './components/Home/Home';
 import SearchBar from './components/SearchBar/SearchBar';

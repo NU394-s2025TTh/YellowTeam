@@ -8,8 +8,8 @@ const Home: React.FC = () => {
     <div style={{ textAlign: 'center', padding: '2rem' }}>
       <h1>Welcome to PowderPrep</h1>
       <p>
-        Your personalized ski trip assistant. Get live forecasts, plan your gear, and hit the slopes
-        stress-free.
+        Your personalized ski trip assistant. Get live forecasts, plan your gear, and hit
+        the slopes stress-free.
       </p>
       <button onClick={() => navigate('/search')} className="search-button">
         Start Planning

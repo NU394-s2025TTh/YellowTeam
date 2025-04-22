@@ -1,19 +1,13 @@
 import './FiveDayForecast.css';
 
 import React from 'react';
-
-interface DayForecast {
-  dayOfWeek: string;
-  am: { summary: string; snow: string; maxTemp: string };
-  pm: { summary: string; snow: string; maxTemp: string };
-  night: { summary: string; snow: string; maxTemp: string };
-}
+import { Forecast } from 'types/Forecast';
 
 interface Props {
-  days: DayForecast[];
+  days: Forecast[];
 }
 
-export default function FiveDayForecast({ days }: Props) {
+export const FiveDayForecast = ({ days }: Props) => {
   return (
     <div className="resort-info">
       <h3>5‑Day Forecast (AM/PM/Night)</h3>
@@ -36,4 +30,4 @@ export default function FiveDayForecast({ days }: Props) {
       </ul>
     </div>
   );
-}
+};
