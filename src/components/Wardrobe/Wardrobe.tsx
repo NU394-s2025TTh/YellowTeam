@@ -27,7 +27,8 @@ export default function Wardrobe() {
   };
 
   const removeItem = (index: number) => {
-    setItems((prev) => prev.filter((_, i) => i !== index));
+    const newList = items.filter((item, i) => i !== index);
+    setData(`/users/testingUser123/wardrobe`, newList);
   };
 
   const handleGenerateReport = () => {

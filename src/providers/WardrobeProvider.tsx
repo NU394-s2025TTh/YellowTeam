@@ -27,7 +27,7 @@ const WardrobeContextProvider = (props: PropsWithChildren) => {
       ref(getDatabase(), `/users/testingUser123/wardrobe`),
       (snapshot) => {
         const databaseItems: WardrobeItem[] = snapshot.val();
-        setItems(databaseItems);
+        setItems(databaseItems ?? []);
       },
     );
 

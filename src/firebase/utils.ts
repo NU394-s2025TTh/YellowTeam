@@ -2,7 +2,7 @@ import 'firebase/database';
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { initializeApp } from 'firebase/app';
-import { get, getDatabase, push, ref, set, update } from 'firebase/database';
+import { get, getDatabase, push, ref, remove, set, update } from 'firebase/database';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyB33D08gA80Fp7ZoW6d-BvS3wpasaGC1HM',
@@ -31,7 +31,11 @@ const pushData = async (path: string, data?: unknown) => {
   await push(ref(getDatabase(), path), data);
 };
 
-export { getData, pushData, setData, updateData };
+const removeData = async (path: string) => {
+  await remove(ref(getDatabase(), path));
+};
+
+export { getData, pushData, removeData, setData, updateData };
 
 // API Config
 const API_KEY = '27b5e10d34msh17b13f004c5bc97p1bdf52jsn8da550d4df82';
