@@ -3,6 +3,7 @@ import './Wardrobe.css';
 
 import React, { useState } from 'react';
 import { DEFAULT_ITEM, MAX_INPUT } from 'src/constants/wardrobeValues';
+import { setData } from 'src/firebase/utils';
 import { useWardrobeContext } from 'src/providers/WardrobeProvider';
 import { Categories, GearCategory, WardrobeItem } from 'src/types/WardrobeItem';
 
@@ -13,7 +14,8 @@ export default function Wardrobe() {
   const handleAdd = () => {
     const name = newItem.name.trim();
     if (!name) return;
-    setItems((prev) => [...prev, newItem]);
+
+    setData(`/users/testingUser123/wardrobe`, [...items, newItem]);
     setNewItem({ ...DEFAULT_ITEM });
   };
 
