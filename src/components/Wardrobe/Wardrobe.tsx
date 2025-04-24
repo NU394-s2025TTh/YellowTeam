@@ -1,52 +1,19 @@
 // src/components/Wardrobe/Wardrobe.tsx
 import './Wardrobe.css';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { DEFAULT_ITEM, MAX_INPUT } from 'src/constants/wardrobeValues';
 import { useWardrobeContext } from 'src/providers/WardrobeProvider';
-import { GearCategory, WardrobeItem } from 'src/types/WardrobeItem';
-
-import { getData } from '../../firebase/utils';
-
-const categories: GearCategory[] = [
-  'Base Layers',
-  'Mid Layers',
-  'Outer Layers',
-  'Accessories',
-];
+import { Categories, GearCategory, WardrobeItem } from 'src/types/WardrobeItem';
 
 export default function Wardrobe() {
   const { items, setItems } = useWardrobeContext();
-
-  // start newItem from your default
   const [newItem, setNewItem] = useState<WardrobeItem>(DEFAULT_ITEM);
-
-  // load existing from Firebase
-  useEffect(() => {
-    (async () => {
-      try {
-        const snap = await getData('users/testUser123/wardrobe');
-        const saved: Record<GearCategory, string[]> = snap.val() || {};
-        const loaded: WardrobeItem[] = [];
-        categories.forEach((cat) => {
-          (saved[cat] || []).forEach((name) => {
-            loaded.push({ name, category: cat, warmth: 3 });
-            // default saved items to mid‑warmth
-          });
-        });
-        setItems(loaded);
-      } catch {
-        /* ignore */
-      }
-    })();
-  }, [setItems]);
 
   const handleAdd = () => {
     const name = newItem.name.trim();
     if (!name) return;
-    // push the exact newItem object (with its category & warmth)
     setItems((prev) => [...prev, newItem]);
-    // reset back to defaults
     setNewItem({ ...DEFAULT_ITEM });
   };
 
@@ -86,7 +53,7 @@ export default function Wardrobe() {
             }))
           }
         >
-          {categories.map((cat) => (
+          {Categories.map((cat) => (
             <option key={cat} value={cat}>
               {cat}
             </option>
@@ -127,7 +94,7 @@ export default function Wardrobe() {
                 updateItem(idx, { category: e.target.value as GearCategory })
               }
             >
-              {categories.map((cat) => (
+              {Categories.map((cat) => (
                 <option key={cat} value={cat}>
                   {cat}
                 </option>
