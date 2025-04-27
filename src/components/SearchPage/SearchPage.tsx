@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
 import {
-  getData,
   getFiveDayForecast,
   getHourlyForecast,
   getSnowConditions,
-} from '../../firebase/utils';
+} from 'src/api/snowApi';
+
+import { getData } from '../../firebase/utils';
 import type { Forecast } from '../../types/Forecast';
 import { FiveDayForecast } from '../FiveDayForecast/FiveDayForecast';
 import HourlyForecast from '../HourlyForecast/HourlyForecast';
