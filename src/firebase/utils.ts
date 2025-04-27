@@ -1,6 +1,7 @@
 import 'firebase/database';
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { getAuth, GoogleAuthProvider } from '@firebase/auth';
 import { initializeApp } from 'firebase/app';
 import { get, getDatabase, push, ref, set, update } from 'firebase/database';
 
@@ -14,7 +15,10 @@ const firebaseConfig = {
   appId: '1:266068817759:web:8225bd63e9e121dff568ea',
 };
 
-initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig);
+
+const auth = getAuth(app);
+auth.useDeviceLanguage();
 
 const setData = async (path: string, data: unknown) => {
   await set(ref(getDatabase(), path), data);
@@ -31,7 +35,7 @@ const pushData = async (path: string, data?: unknown) => {
   await push(ref(getDatabase(), path), data);
 };
 
-export { getData, pushData, setData, updateData };
+export { app, auth, getData, pushData, setData, updateData };
 
 // API Config
 const API_KEY = '27b5e10d34msh17b13f004c5bc97p1bdf52jsn8da550d4df82';

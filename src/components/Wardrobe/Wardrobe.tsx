@@ -7,6 +7,7 @@ import { useWardrobeContext } from 'src/providers/WardrobeProvider';
 import { GearCategory, WardrobeItem } from 'src/types/WardrobeItem';
 
 import { getData } from '../../firebase/utils';
+import { GoogleSignIn } from '../GoogleSignIn';
 
 const categories: GearCategory[] = [
   'Base Layers',
@@ -69,6 +70,7 @@ export default function Wardrobe() {
     <div className="wardrobe-page">
       {/* ─── Add new item */}
       <div className="wardrobe-input">
+        <GoogleSignIn />
         <input
           type="text"
           placeholder="Item Name"
