@@ -1,12 +1,15 @@
 // src/components/Wardrobe/Wardrobe.tsx
 import './Wardrobe.css';
 
+import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
 import React, { useEffect, useState } from 'react';
 import { DEFAULT_ITEM, MAX_INPUT } from 'src/constants/wardrobeValues';
 import { useWardrobeContext } from 'src/providers/WardrobeProvider';
 import { GearCategory, WardrobeItem } from 'src/types/WardrobeItem';
 
-import { getData } from '../../firebase/utils';
+import { app, getData, setData } from '../../firebase/utils';
+
+const auth = getAuth(app);
 
 const categories: GearCategory[] = [
   'Base Layers',
@@ -21,25 +24,65 @@ export default function Wardrobe() {
   // start newItem from your default
   const [newItem, setNewItem] = useState<WardrobeItem>(DEFAULT_ITEM);
 
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      setUser(firebaseUser);
+    });
+    return () => unsubscribe();
+  }, []);
+
   // load existing from Firebase
   useEffect(() => {
     (async () => {
       try {
-        const snap = await getData('users/testUser123/wardrobe');
-        const saved: Record<GearCategory, string[]> = snap.val() || {};
-        const loaded: WardrobeItem[] = [];
-        categories.forEach((cat) => {
-          (saved[cat] || []).forEach((name) => {
-            loaded.push({ name, category: cat, warmth: 3 });
-            // default saved items to mid‑warmth
+        if (user) {
+          console.log('loading wardrobe for user:', user.uid);
+          const snap = await getData(`users/${user.uid}/wardrobe`);
+          console.log('fetched wardrobe snapshot', snap.val());
+          const saved: Record<GearCategory, string[]> = snap.val() || {};
+          const loaded: WardrobeItem[] = [];
+          categories.forEach((cat) => {
+            (saved[cat] || []).forEach((name) => {
+              loaded.push({ name, category: cat, warmth: 3 });
+              // default saved items to mid‑warmth
+            });
           });
-        });
-        setItems(loaded);
+          setItems(loaded);
+        }
       } catch {
         /* ignore */
       }
     })();
-  }, [setItems]);
+  }, [setItems, user]);
+
+  // save wardrobe to firebase
+  useEffect(() => {
+    (async () => {
+      try {
+        if (user && items.length > 0) {
+          console.log('saving wardrobe for user: ', user.uid);
+          // convert WardrobeItem[] back into { category: [item names] }
+          const wardrobeByCategory: Record<GearCategory, string[]> = {
+            'Base Layers': [],
+            'Mid Layers': [],
+            'Outer Layers': [],
+            Accessories: [],
+          };
+          items.forEach((item) => {
+            wardrobeByCategory[item.category].push(item.name);
+          });
+          console.log('saving wardrobe data:', wardrobeByCategory);
+          await setData(`users/${user.uid}/wardrobe`, wardrobeByCategory);
+        } else {
+          console.log('no user when trying to save wardrobe');
+        }
+      } catch (error) {
+        console.error('Failed to save wardrobe', error);
+      }
+    })();
+  }, [items, user]);
 
   const handleAdd = () => {
     const name = newItem.name.trim();

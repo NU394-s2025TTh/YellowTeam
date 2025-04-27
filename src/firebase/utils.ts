@@ -13,7 +13,7 @@ const firebaseConfig = {
   appId: '1:266068817759:web:8225bd63e9e121dff568ea',
 };
 
-initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig);
 
 const setData = async (path: string, data: unknown) => {
   await set(ref(getDatabase(), path), data);
@@ -30,4 +30,4 @@ const pushData = async (path: string, data?: unknown) => {
   await push(ref(getDatabase(), path), data);
 };
 
-export { getData, pushData, setData, updateData };
+export { app, getData, pushData, setData, updateData };
