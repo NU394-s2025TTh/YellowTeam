@@ -24,7 +24,7 @@ const WardrobeContextProvider = (props: PropsWithChildren) => {
 
   useEffect(() => {
     const unsubscribe = onValue(
-      ref(getDatabase(), `/users/testingUser123/wardrobe`),
+      ref(getDatabase(), `/wardrobes/testingUser123`),
       (snapshot) => {
         const databaseItems: WardrobeItem[] = snapshot.val();
         setItems(databaseItems ?? []);

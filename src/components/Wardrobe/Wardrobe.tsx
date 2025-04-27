@@ -8,27 +8,28 @@ import { useWardrobeContext } from 'src/providers/WardrobeProvider';
 import { Categories, GearCategory, WardrobeItem } from 'src/types/WardrobeItem';
 
 export default function Wardrobe() {
-  const { items, setItems } = useWardrobeContext();
+  const { items } = useWardrobeContext();
   const [newItem, setNewItem] = useState<WardrobeItem>(DEFAULT_ITEM);
 
-  const handleAdd = () => {
+  const handleAdd = async () => {
     const name = newItem.name.trim();
     if (!name) return;
 
-    setData(`/users/testingUser123/wardrobe`, [...items, newItem]);
+    setData(`/wardrobes/testingUser123`, [...items, newItem]);
     setNewItem({ ...DEFAULT_ITEM });
   };
 
   const updateItem = (
     index: number,
-    updates: Partial<Pick<WardrobeItem, 'category' | 'warmth'>>,
+    updates: Partial<Pick<WardrobeItem, 'category' | 'warmth' | 'name'>>,
   ) => {
-    setItems((prev) => prev.map((it, i) => (i === index ? { ...it, ...updates } : it)));
+    const updatedItems = items.map((it, i) => (i === index ? { ...it, ...updates } : it));
+    setData(`/wardrobes/testingUser123`, updatedItems);
   };
 
   const removeItem = (index: number) => {
     const newList = items.filter((item, i) => i !== index);
-    setData(`/users/testingUser123/wardrobe`, newList);
+    setData(`/wardrobes/testingUser123`, newList);
   };
 
   const handleGenerateReport = () => {
@@ -89,7 +90,11 @@ export default function Wardrobe() {
         <h3>Inventory</h3>
         {items.map((item, idx) => (
           <div className="inventory-item" key={idx}>
-            <input type="text" value={item.name} readOnly />
+            <input
+              type="text"
+              defaultValue={item.name}
+              onChange={(item) => updateItem(idx, { name: item.target.value })}
+            />
 
             <select
               value={item.category}
