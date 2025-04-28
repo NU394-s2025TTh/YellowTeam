@@ -25,9 +25,49 @@ const gearOptions: Record<GearCategory, string[]> = {
   Accessories: ['Gloves', 'Beanie', 'Goggles', 'Neck Gaiter'],
 };
 
+// helper to call OpenAI directly
+// MAKE A .ENV IN ROOT, ADD VITE_OPENAI_KEY=yourkey
+async function fetchPackingReport(items: WardrobeItem[]): Promise<string> {
+  const bulletList = items
+    .map((i) => `- ${i.name} (${i.category}, warmth ${i.warmth}/5)`)
+    .join('\n');
+
+  const body = {
+    model: 'gpt-4o-mini',
+    temperature: 0.7,
+    max_tokens: 300,
+    messages: [
+      { role: 'system', content: 'You’re a ski-packing assistant.' },
+      {
+        role: 'user',
+        content: `They already have:\n${bulletList}\n\nWhat else should they pack for a week-long ski trip? Reply as a bulleted list.`,
+      },
+    ],
+  };
+
+  console.log('OPENAI KEY:', import.meta.env.VITE_OPENAI_KEY);
+
+  const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${import.meta.env.VITE_OPENAI_KEY}`,
+    },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    throw new Error(`OpenAI error ${res.status}`);
+  }
+  const json = await res.json();
+  return json.choices[0].message.content as string;
+}
+
 export default function Wardrobe() {
   const { items } = useWardrobeContext();
   const [newItem, setNewItem] = useState<WardrobeItem>(DEFAULT_ITEM);
+  const [loading, setLoading] = useState(false);
+  const [report, setReport] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const { user } = useUserContext();
 
   const handleAdd = () => {
@@ -53,8 +93,19 @@ export default function Wardrobe() {
     setData(`/wardrobes/${user?.uid}`, modifiedItems);
   };
 
-  const handleGenerateReport = () => {
-    // TODO
+  const handleGenerateReport = async () => {
+    setLoading(true);
+    setReport(null);
+    setError(null);
+    try {
+      const text = await fetchPackingReport(items);
+      setReport(text.trim());
+    } catch (err) {
+      console.error(err);
+      setError('Failed to generate report.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -165,10 +216,23 @@ export default function Wardrobe() {
         ))}
       </div>
 
-      {/* ─── Generate Report */}
-      <button className="generate-button" onClick={handleGenerateReport}>
-        Generate My Packing Report
+      {/* ─── Generate report */}
+      <button
+        className="generate-button"
+        onClick={handleGenerateReport}
+        disabled={loading}
+      >
+        {loading ? 'Thinking…' : 'Generate My Packing Report'}
       </button>
+
+      {error && <p className="error-text">{error}</p>}
+
+      {report && (
+        <div className="packing-report">
+          <h3>Suggested Additional Items</h3>
+          <pre>{report}</pre>
+        </div>
+      )}
     </div>
   );
 }
