@@ -1,9 +1,10 @@
 // src/components/Wardrobe/Wardrobe.tsx
+// src/components/Wardrobe/Wardrobe.tsx
 import './Wardrobe.css';
 
 import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
 import React, { useEffect, useState } from 'react';
-import { DEFAULT_ITEM, MAX_INPUT } from 'src/constants/wardrobeValues';
+import { DEFAULT_ITEM } from 'src/constants/wardrobeValues';
 import { useWardrobeContext } from 'src/providers/WardrobeProvider';
 import { GearCategory, WardrobeItem } from 'src/types/WardrobeItem';
 
@@ -18,12 +19,17 @@ const categories: GearCategory[] = [
   'Accessories',
 ];
 
+// 🛠 Predefined gear options by category
+const gearOptions: Record<GearCategory, string[]> = {
+  'Base Layers': ['Thermal Shirt', 'Thermal Pants', 'Base Layer Socks'],
+  'Mid Layers': ['Fleece Jacket', 'Sweater'],
+  'Outer Layers': ['Ski Jacket', 'Snow Pants'],
+  Accessories: ['Gloves', 'Beanie', 'Goggles', 'Neck Gaiter'],
+};
+
 export default function Wardrobe() {
   const { items, setItems } = useWardrobeContext();
-
-  // start newItem from your default
   const [newItem, setNewItem] = useState<WardrobeItem>(DEFAULT_ITEM);
-
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
@@ -33,7 +39,7 @@ export default function Wardrobe() {
     return () => unsubscribe();
   }, []);
 
-  // load existing from Firebase
+  // 🛠 Load wardrobe from Firebase
   useEffect(() => {
     (async () => {
       try {
@@ -45,8 +51,7 @@ export default function Wardrobe() {
           const loaded: WardrobeItem[] = [];
           categories.forEach((cat) => {
             (saved[cat] || []).forEach((name) => {
-              loaded.push({ name, category: cat, warmth: 3 });
-              // default saved items to mid‑warmth
+              loaded.push({ name, category: cat, warmth: 3 }); // Default warmth
             });
           });
           setItems(loaded);
@@ -57,13 +62,12 @@ export default function Wardrobe() {
     })();
   }, [setItems, user]);
 
-  // save wardrobe to firebase
+  // 🛠 Save wardrobe to Firebase
   useEffect(() => {
     (async () => {
       try {
         if (user && items.length > 0) {
           console.log('saving wardrobe for user: ', user.uid);
-          // convert WardrobeItem[] back into { category: [item names] }
           const wardrobeByCategory: Record<GearCategory, string[]> = {
             'Base Layers': [],
             'Mid Layers': [],
@@ -76,7 +80,7 @@ export default function Wardrobe() {
           console.log('saving wardrobe data:', wardrobeByCategory);
           await setData(`users/${user.uid}/wardrobe`, wardrobeByCategory);
         } else {
-          console.log('no user when trying to save wardrobe');
+          console.log('no user when trying to save wardrobe or wardrobe empty');
         }
       } catch (error) {
         console.error('Failed to save wardrobe', error);
@@ -86,10 +90,8 @@ export default function Wardrobe() {
 
   const handleAdd = () => {
     const name = newItem.name.trim();
-    if (!name) return;
-    // push the exact newItem object (with its category & warmth)
+    if (!name || !newItem.category) return;
     setItems((prev) => [...prev, newItem]);
-    // reset back to defaults
     setNewItem({ ...DEFAULT_ITEM });
   };
 
@@ -110,25 +112,21 @@ export default function Wardrobe() {
 
   return (
     <div className="wardrobe-page">
-      {/* ─── Add new item */}
+      {/* ─── Add New Item Section */}
       <div className="wardrobe-input">
-        <input
-          type="text"
-          placeholder="Item Name"
-          maxLength={MAX_INPUT}
-          value={newItem.name}
-          onChange={(e) => setNewItem((prev) => ({ ...prev, name: e.target.value }))}
-        />
-
+        {/* Category select */}
+        <h3>Add New Gear</h3>
         <select
           value={newItem.category}
           onChange={(e) =>
             setNewItem((prev) => ({
               ...prev,
               category: e.target.value as GearCategory,
+              name: '', // reset gear selection when category changes
             }))
           }
         >
+          <option value="">Select Category</option>
           {categories.map((cat) => (
             <option key={cat} value={cat}>
               {cat}
@@ -136,8 +134,29 @@ export default function Wardrobe() {
           ))}
         </select>
 
+        {/* Gear item select (dependent on category) */}
+        {newItem.category && (
+          <select
+            value={newItem.name}
+            onChange={(e) =>
+              setNewItem((prev) => ({
+                ...prev,
+                name: e.target.value,
+              }))
+            }
+          >
+            <option value="">Select Gear Item</option>
+            {gearOptions[newItem.category].map((gear) => (
+              <option key={gear} value={gear}>
+                {gear}
+              </option>
+            ))}
+          </select>
+        )}
+
+        {/* Warmth level slider */}
         <div className="slider-wrapper">
-          <label htmlFor="warmth">Warmth Level (1–5)</label>
+          <label htmlFor="warmth">Set Warmth Level (1–5)</label>
           <input
             type="range"
             id="warmth"
@@ -154,10 +173,13 @@ export default function Wardrobe() {
           />
         </div>
 
-        <button onClick={handleAdd}>Add</button>
+        {/* Add item button */}
+        <button onClick={handleAdd} disabled={!newItem.category || !newItem.name}>
+          Add to Wardrobe
+        </button>
       </div>
 
-      {/* ─── Inventory */}
+      {/* ─── Inventory Section */}
       <div className="inventory-section">
         <h3>Inventory</h3>
         {items.map((item, idx) => (
@@ -196,7 +218,7 @@ export default function Wardrobe() {
         ))}
       </div>
 
-      {/* ─── Generate report */}
+      {/* ─── Generate Report */}
       <button className="generate-button" onClick={handleGenerateReport}>
         Generate My Packing Report
       </button>

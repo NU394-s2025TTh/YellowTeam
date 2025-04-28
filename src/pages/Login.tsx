@@ -1,3 +1,5 @@
+import './Login.css';
+
 import { useNavigate } from 'react-router-dom';
 
 import { signInWithGoogle } from '../firebase/user';
@@ -17,18 +19,14 @@ const Login = () => {
   };
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        marginTop: '20vh',
-      }}
-    >
-      <h1>Login to PowderPrep</h1>
-      <button onClick={handleLogin} style={{ marginTop: '20px', padding: '10px 20px' }}>
-        Sign in with Google
-      </button>
+    <div className="login-page">
+      <div className="login-card">
+        <h1>Welcome to PowderPrep</h1>
+        <p>Sign in to start preparing for your ski trips!</p>
+        <button className="login-button" onClick={handleLogin}>
+          Sign in with Google
+        </button>
+      </div>
     </div>
   );
 };
