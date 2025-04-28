@@ -3,10 +3,9 @@ import './Wardrobe.css';
 
 import React, { useEffect, useState } from 'react';
 import { DEFAULT_ITEM, MAX_INPUT } from 'src/constants/wardrobeValues';
+import { getData } from 'src/firebase/utils';
 import { useWardrobeContext } from 'src/providers/WardrobeProvider';
 import { GearCategory, WardrobeItem } from 'src/types/WardrobeItem';
-
-import { getData } from '../../firebase/utils';
 
 const categories: GearCategory[] = [
   'Base Layers',
@@ -15,11 +14,48 @@ const categories: GearCategory[] = [
   'Accessories',
 ];
 
+// helper to call OpenAI directly
+async function fetchPackingReport(items: WardrobeItem[]): Promise<string> {
+  const bulletList = items
+    .map((i) => `- ${i.name} (${i.category}, warmth ${i.warmth}/5)`)
+    .join('\n');
+
+  const body = {
+    model: 'gpt-4o-mini',
+    temperature: 0.7,
+    max_tokens: 300,
+    messages: [
+      { role: 'system', content: 'You’re a ski-packing assistant.' },
+      {
+        role: 'user',
+        content: `They already have:\n${bulletList}\n\nWhat else should they pack for a week-long ski trip? Reply as a bulleted list.`,
+      },
+    ],
+  };
+
+  console.log('OPENAI KEY:', import.meta.env.VITE_OPENAI_KEY);
+
+  const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${import.meta.env.VITE_OPENAI_KEY}`,
+    },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    throw new Error(`OpenAI error ${res.status}`);
+  }
+  const json = await res.json();
+  return json.choices[0].message.content as string;
+}
+
 export default function Wardrobe() {
   const { items, setItems } = useWardrobeContext();
-
-  // start newItem from your default
   const [newItem, setNewItem] = useState<WardrobeItem>(DEFAULT_ITEM);
+  const [loading, setLoading] = useState(false);
+  const [report, setReport] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   // load existing from Firebase
   useEffect(() => {
@@ -31,7 +67,6 @@ export default function Wardrobe() {
         categories.forEach((cat) => {
           (saved[cat] || []).forEach((name) => {
             loaded.push({ name, category: cat, warmth: 3 });
-            // default saved items to mid‑warmth
           });
         });
         setItems(loaded);
@@ -44,9 +79,7 @@ export default function Wardrobe() {
   const handleAdd = () => {
     const name = newItem.name.trim();
     if (!name) return;
-    // push the exact newItem object (with its category & warmth)
     setItems((prev) => [...prev, newItem]);
-    // reset back to defaults
     setNewItem({ ...DEFAULT_ITEM });
   };
 
@@ -61,8 +94,19 @@ export default function Wardrobe() {
     setItems((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleGenerateReport = () => {
-    // TODO
+  const handleGenerateReport = async () => {
+    setLoading(true);
+    setReport(null);
+    setError(null);
+    try {
+      const text = await fetchPackingReport(items);
+      setReport(text.trim());
+    } catch (err) {
+      console.error(err);
+      setError('Failed to generate report.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -154,9 +198,22 @@ export default function Wardrobe() {
       </div>
 
       {/* ─── Generate report */}
-      <button className="generate-button" onClick={handleGenerateReport}>
-        Generate My Packing Report
+      <button
+        className="generate-button"
+        onClick={handleGenerateReport}
+        disabled={loading}
+      >
+        {loading ? 'Thinking…' : 'Generate My Packing Report'}
       </button>
+
+      {error && <p className="error-text">{error}</p>}
+
+      {report && (
+        <div className="packing-report">
+          <h3>Suggested Additional Items</h3>
+          <pre>{report}</pre>
+        </div>
+      )}
     </div>
   );
 }
