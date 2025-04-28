@@ -29,5 +29,41 @@ const updateData = async (path: string, data: object) => {
 const pushData = async (path: string, data?: unknown) => {
   await push(ref(getDatabase(), path), data);
 };
+const saveViewedLocation = async (userId: string, location: string) => {
+  const path = `users/${userId}/viewedLocations`;
+  const snapshot = await getData(path);
+  if (snapshot.exists()) {
+    const locationsObj = snapshot.val();
+    const locations = Object.values(locationsObj) as string[];
 
-export { getData, pushData, setData, updateData };
+    const alreadyViewed = locations.some(
+      (loc) => loc.trim().toLowerCase() === location.trim().toLowerCase(),
+    );
+
+    if (alreadyViewed) {
+      console.log('Location already viewed, skipping save.');
+      return;
+    }
+  }
+
+  await pushData(path, location);
+};
+const fetchViewedLocations = async (userId: string): Promise<string[]> => {
+  const path = `users/${userId}/viewedLocations`;
+  const snapshot = await getData(path);
+  if (snapshot.exists()) {
+    const locationsObj = snapshot.val();
+    const locations = Object.values(locationsObj) as string[];
+    return locations;
+  }
+  return [];
+};
+
+export {
+  fetchViewedLocations,
+  getData,
+  pushData,
+  saveViewedLocation,
+  setData,
+  updateData,
+};
