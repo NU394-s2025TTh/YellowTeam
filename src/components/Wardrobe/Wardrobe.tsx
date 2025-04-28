@@ -15,6 +15,7 @@ const categories: GearCategory[] = [
 ];
 
 // helper to call OpenAI directly
+// MAKE A .ENV IN ROOT, ADD VITE_OPENAI_KEY=yourkey
 async function fetchPackingReport(items: WardrobeItem[]): Promise<string> {
   const bulletList = items
     .map((i) => `- ${i.name} (${i.category}, warmth ${i.warmth}/5)`)
