@@ -2,15 +2,13 @@
 // src/components/Wardrobe/Wardrobe.tsx
 import './Wardrobe.css';
 
-import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { DEFAULT_ITEM } from 'src/constants/wardrobeValues';
+import { useUserContext } from 'src/providers/UserProvider';
 import { useWardrobeContext } from 'src/providers/WardrobeProvider';
 import { GearCategory, WardrobeItem } from 'src/types/WardrobeItem';
 
-import { app, getData, setData } from '../../firebase/utils';
-
-const auth = getAuth(app);
+import { setData } from '../../firebase/utils';
 
 const categories: GearCategory[] = [
   'Base Layers',
@@ -28,70 +26,15 @@ const gearOptions: Record<GearCategory, string[]> = {
 };
 
 export default function Wardrobe() {
-  const { items, setItems } = useWardrobeContext();
+  const { items } = useWardrobeContext();
   const [newItem, setNewItem] = useState<WardrobeItem>(DEFAULT_ITEM);
-  const [user, setUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      setUser(firebaseUser);
-    });
-    return () => unsubscribe();
-  }, []);
-
-  // 🛠 Load wardrobe from Firebase
-  useEffect(() => {
-    (async () => {
-      try {
-        if (user) {
-          console.log('loading wardrobe for user:', user.uid);
-          const snap = await getData(`users/${user.uid}/wardrobe`);
-          console.log('fetched wardrobe snapshot', snap.val());
-          const saved: Record<GearCategory, string[]> = snap.val() || {};
-          const loaded: WardrobeItem[] = [];
-          categories.forEach((cat) => {
-            (saved[cat] || []).forEach((name) => {
-              loaded.push({ name, category: cat, warmth: 3 }); // Default warmth
-            });
-          });
-          setItems(loaded);
-        }
-      } catch {
-        /* ignore */
-      }
-    })();
-  }, [setItems, user]);
-
-  // 🛠 Save wardrobe to Firebase
-  useEffect(() => {
-    (async () => {
-      try {
-        if (user && items.length > 0) {
-          console.log('saving wardrobe for user: ', user.uid);
-          const wardrobeByCategory: Record<GearCategory, string[]> = {
-            'Base Layers': [],
-            'Mid Layers': [],
-            'Outer Layers': [],
-            Accessories: [],
-          };
-          items.forEach((item) => {
-            wardrobeByCategory[item.category].push(item.name);
-          });
-          console.log('saving wardrobe data:', wardrobeByCategory);
-          await setData(`users/${user.uid}/wardrobe`, wardrobeByCategory);
-        } else {
-          console.log('no user when trying to save wardrobe or wardrobe empty');
-        }
-      } catch (error) {
-        console.error('Failed to save wardrobe', error);
-      }
-    })();
-  }, [items, user]);
+  const { user } = useUserContext();
 
   const handleAdd = () => {
     const name = newItem.name.trim();
     if (!name || !newItem.category) return;
-    setItems((prev) => [...prev, newItem]);
+
+    setData(`/wardrobes/${user?.uid}`, [...items, newItem]);
     setNewItem({ ...DEFAULT_ITEM });
   };
 
@@ -99,11 +42,15 @@ export default function Wardrobe() {
     index: number,
     updates: Partial<Pick<WardrobeItem, 'category' | 'warmth'>>,
   ) => {
-    setItems((prev) => prev.map((it, i) => (i === index ? { ...it, ...updates } : it)));
+    const modifiedItems = items.map((it, i) =>
+      i === index ? { ...it, ...updates } : it,
+    );
+    setData(`/wardrobes/${user?.uid}`, modifiedItems);
   };
 
   const removeItem = (index: number) => {
-    setItems((prev) => prev.filter((_, i) => i !== index));
+    const modifiedItems = items.filter((item, i) => i !== index);
+    setData(`/wardrobes/${user?.uid}`, modifiedItems);
   };
 
   const handleGenerateReport = () => {

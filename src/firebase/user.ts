@@ -1,6 +1,12 @@
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signOut,
+  User,
+} from 'firebase/auth';
 
-import { app } from '../firebase/utils'; // make sure this is the correct path
+import { app, setData } from '../firebase/utils'; // make sure this is the correct path
 
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
@@ -11,14 +17,15 @@ const provider = new GoogleAuthProvider();
 export const signInWithGoogle = async () => {
   try {
     const result = await signInWithPopup(auth, provider);
+
     const user = result.user;
     if (!user) throw new Error('No user returned');
 
     return {
       uid: user.uid,
-      name: user.displayName || '',
-      email: user.email || '',
-      photoURL: user.photoURL || '',
+      name: user.displayName ?? '',
+      email: user.email ?? '',
+      photoURL: user.photoURL ?? '',
     };
   } catch (error) {
     console.error('Google sign-in error', error);
@@ -43,4 +50,14 @@ export const logOut = async () => {
  */
 export const getCurrentUser = () => {
   return auth.currentUser;
+};
+
+export const createUser = async (user: User) => {
+  const userFields = {
+    name: user.displayName,
+    profilePhoto: user.photoURL,
+    uid: user.uid,
+  };
+
+  await setData(`/users/${user.uid}`, userFields);
 };

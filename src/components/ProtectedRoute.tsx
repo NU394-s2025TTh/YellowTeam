@@ -1,13 +1,14 @@
-import { User } from 'firebase/auth';
 import React, { ReactNode } from 'react';
 import { Navigate } from 'react-router-dom';
+import { useUserContext } from 'src/providers/UserProvider';
 
 interface ProtectedRouteProps {
-  user: User | null;
   children: ReactNode;
 }
 
-const ProtectedRoute = ({ user, children }: ProtectedRouteProps) => {
+const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
+  const { user } = useUserContext();
+
   if (!user) {
     return <Navigate to="/login" replace />;
   }

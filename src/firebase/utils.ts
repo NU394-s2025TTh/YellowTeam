@@ -1,6 +1,7 @@
 import 'firebase/database';
 
 import { initializeApp } from 'firebase/app';
+import { getAuth } from 'firebase/auth';
 import { get, getDatabase, push, ref, set, update } from 'firebase/database';
 
 const firebaseConfig = {
@@ -14,6 +15,7 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 
 const setData = async (path: string, data: unknown) => {
   await set(ref(getDatabase(), path), data);
@@ -30,4 +32,4 @@ const pushData = async (path: string, data?: unknown) => {
   await push(ref(getDatabase(), path), data);
 };
 
-export { app, getData, pushData, setData, updateData };
+export { app, auth, getData, pushData, setData, updateData };

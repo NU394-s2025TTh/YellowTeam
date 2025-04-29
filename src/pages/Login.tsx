@@ -10,7 +10,6 @@ const Login = () => {
   const handleLogin = async () => {
     try {
       const userInfo = await signInWithGoogle();
-      console.log('Logged in user:', userInfo);
       localStorage.setItem('user', JSON.stringify(userInfo));
       navigate('/'); // redirect to home page after login
     } catch (error) {
