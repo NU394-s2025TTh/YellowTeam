@@ -7,6 +7,7 @@ import {
 } from 'src/api/snowApi';
 
 import { getData, saveViewedLocation } from '../../firebase/utils';
+import { getCurrentUser } from '../../firebase/user';
 import type { Forecast } from '../../types/Forecast';
 import { FiveDayForecast } from '../FiveDayForecast/FiveDayForecast';
 import HourlyForecast from '../HourlyForecast/HourlyForecast';
@@ -74,7 +75,13 @@ const SearchPage: React.FC = () => {
         lastSnowfallDate: snow.lastSnowfallDate || 'N/A',
         url: snow.basicInfo?.url || '#',
       });
-      await saveViewedLocation('testUser123', snow.basicInfo?.name || q);
+      const user = getCurrentUser();
+      // await saveViewedLocation('testUser123', snow.basicInfo?.name || q);
+      if (user) {
+        await saveViewedLocation(user.uid, snow.basicInfo?.name || q);
+      } else {
+        console.warn('No user signed in, skipping saveViewedLocation.');
+      }
       setForecastList(hours);
       setFiveDayForecast(days);
 

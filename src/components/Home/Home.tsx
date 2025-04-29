@@ -3,13 +3,20 @@ import { useNavigate } from 'react-router-dom';
 
 import { fetchViewedLocations } from '../../firebase/utils';
 
+import { getCurrentUser } from '../../firebase/user';
+
 const Home: React.FC = () => {
   const navigate = useNavigate();
   const [viewedLocations, setViewedLocations] = useState<string[]>([]);
   useEffect(() => {
     const loadViewedLocations = async () => {
+      const user = getCurrentUser();
+      if (!user) {
+        console.warn('No user is signed in.');
+        return;
+      }
       try {
-        const locations = await fetchViewedLocations('testUser123');
+        const locations = await fetchViewedLocations(user.uid);
         locations.reverse();
         const topFourLocations = locations.slice(0, 4);
         setViewedLocations(topFourLocations);
@@ -38,7 +45,12 @@ const Home: React.FC = () => {
           ))}
         </div>
       )}
-      <button onClick={() => navigate('/search')} className="search-button">
+
+      <button
+        onClick={() => navigate('/search')}
+        className="search-button"
+        style={{ marginTop: '3rem' }}
+      >
         Start Planning
       </button>
     </div>
