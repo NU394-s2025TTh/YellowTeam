@@ -6,7 +6,7 @@ import {
   getSnowConditions,
 } from 'src/api/snowApi';
 
-import { getData, saveViewedLocation } from '../../firebase/utils';
+import { getData } from '../../firebase/utils';
 import type { Forecast } from '../../types/Forecast';
 import { FiveDayForecast } from '../FiveDayForecast/FiveDayForecast';
 import HourlyForecast from '../HourlyForecast/HourlyForecast';
@@ -38,6 +38,9 @@ const SearchPage: React.FC = () => {
   const [isLoading, setLoading] = useState<boolean>(false);
   const [showGearInput] = useState(false);
 
+  // REMOVE LATER
+  console.log(isLoading);
+
   useEffect(() => {
     setChartData(
       fiveDayForecast.map((day: Forecast) => ({
@@ -56,28 +59,27 @@ const SearchPage: React.FC = () => {
     setForecastList([]);
     setFiveDayForecast([]);
 
+    const snow = await getSnowConditions(q);
+    const hours = await getHourlyForecast(q);
+    const days = await getFiveDayForecast(q);
+    setLoading(false);
+
+    if (!snow) {
+      alert('No snow data found for that resort.');
+      return;
+    }
+
+    setResortData({
+      name: snow.basicInfo?.name || q,
+      topSnowDepth: snow.topSnowDepth || 'N/A',
+      botSnowDepth: snow.botSnowDepth || 'N/A',
+      lastSnowfallDate: snow.lastSnowfallDate || 'N/A',
+      url: snow.basicInfo?.url || '#',
+    });
+    setForecastList(hours);
+    setFiveDayForecast(days);
+
     try {
-      const snow = await getSnowConditions(q);
-      const hours = await getHourlyForecast(q);
-      const days = await getFiveDayForecast(q);
-
-      if (!snow) {
-        alert('No snow data found for that resort.');
-        setLoading(false);
-        return;
-      }
-
-      setResortData({
-        name: snow.basicInfo?.name || q,
-        topSnowDepth: snow.topSnowDepth || 'N/A',
-        botSnowDepth: snow.botSnowDepth || 'N/A',
-        lastSnowfallDate: snow.lastSnowfallDate || 'N/A',
-        url: snow.basicInfo?.url || '#',
-      });
-      await saveViewedLocation('testUser123', snow.basicInfo?.name || q);
-      setForecastList(hours);
-      setFiveDayForecast(days);
-
       const snap = await getData('users/testUser123/wardrobe');
       const arrs: string[][] = Object.values(snap.val() || {});
       const owned = new Set(arrs.flat().map((s) => s.toLowerCase()));
@@ -97,10 +99,8 @@ const SearchPage: React.FC = () => {
       });
       setGearChecked(checks);
     } catch (err) {
-      console.error('Failed to fetch data:', err);
+      console.error('Failed to load wardrobe:', err);
     }
-
-    setLoading(false);
   };
 
   const toggleCheckbox = (item: string) =>
@@ -114,7 +114,6 @@ const SearchPage: React.FC = () => {
         onSearch={handleSearch}
         onToggleWardrobe={() => navigate('/wardrobe')}
         showWardrobe={showGearInput}
-        loading={isLoading} // <<--- ADD THIS!!!
       />
 
       {resortData && (
