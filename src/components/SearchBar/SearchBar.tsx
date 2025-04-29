@@ -8,6 +8,7 @@ interface Props {
   onSearch: () => void;
   onToggleWardrobe: () => void;
   showWardrobe: boolean;
+  loading: boolean; // <-- NEW
 }
 
 export default function SearchBar({
@@ -16,6 +17,7 @@ export default function SearchBar({
   onSearch,
   onToggleWardrobe,
   showWardrobe,
+  loading, // <-- NEW
 }: Props) {
   return (
     <div className="search-gear-bar">
@@ -26,8 +28,12 @@ export default function SearchBar({
         onChange={onChange}
         className="location-input"
       />
-      <button onClick={onSearch} className="search-button">
-        Search
+      <button
+        onClick={onSearch}
+        className="search-button"
+        disabled={loading} // disable button while loading
+      >
+        {loading ? 'Loading...' : 'Search'}
       </button>
       <button onClick={onToggleWardrobe} className="search-button add-gear-button">
         {showWardrobe ? 'Hide Wardrobe' : 'My Wardrobe'}
