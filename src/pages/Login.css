@@ -1,0 +1,50 @@
+/* Login Background Wrapper */
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+}
+
+/* Login Card */
+.login-card {
+  background: rgba(255, 255, 255, 0.85);
+  padding: 3rem 2rem;
+  border-radius: 16px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+}
+
+/* Heading */
+.login-card h1 {
+  margin-bottom: 1rem;
+  color: var(--button);
+  font-size: 2rem;
+}
+
+/* Subtext */
+.login-card p {
+  margin-bottom: 2rem;
+  color: #555;
+  font-size: 1rem;
+}
+
+/* Login Button */
+.login-button {
+  padding: 0.75rem 2rem;
+  background: var(--button);
+  color: white;
+  font-weight: 600;
+  font-size: 1.05rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.login-button:hover {
+  background: var(--accent);
+}

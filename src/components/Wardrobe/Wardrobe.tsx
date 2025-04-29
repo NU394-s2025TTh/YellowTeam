@@ -3,7 +3,8 @@ import './Wardrobe.css';
 
 import React, { useEffect, useState } from 'react';
 import { DEFAULT_ITEM, MAX_INPUT } from 'src/constants/wardrobeValues';
-import { getData } from 'src/firebase/utils';
+import { getData, setData } from 'src/firebase/utils';
+import { useUserContext } from 'src/providers/UserProvider';
 import { useWardrobeContext } from 'src/providers/WardrobeProvider';
 import { GearCategory, WardrobeItem } from 'src/types/WardrobeItem';
 
@@ -14,7 +15,14 @@ const categories: GearCategory[] = [
   'Accessories',
 ];
 
-// helper to call OpenAI directly
+const gearOptions: Record<GearCategory, string[]> = {
+  'Base Layers': ['Thermal Shirt', 'Thermal Pants', 'Base Layer Socks'],
+  'Mid Layers': ['Fleece Jacket', 'Sweater'],
+  'Outer Layers': ['Ski Jacket', 'Snow Pants'],
+  Accessories: ['Gloves', 'Beanie', 'Goggles', 'Neck Gaiter'],
+};
+
+// ─── helper to call OpenAI directly
 // MAKE A .ENV IN ROOT, ADD VITE_OPENAI_KEY=yourkey
 async function fetchPackingReport(items: WardrobeItem[]): Promise<string> {
   const bulletList = items
@@ -34,8 +42,6 @@ async function fetchPackingReport(items: WardrobeItem[]): Promise<string> {
     ],
   };
 
-  console.log('OPENAI KEY:', import.meta.env.VITE_OPENAI_KEY);
-
   const res = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -44,25 +50,28 @@ async function fetchPackingReport(items: WardrobeItem[]): Promise<string> {
     },
     body: JSON.stringify(body),
   });
+
   if (!res.ok) {
     throw new Error(`OpenAI error ${res.status}`);
   }
   const json = await res.json();
-  return json.choices[0].message.content as string;
+  return json.choices[0].message.content.trim();
 }
 
 export default function Wardrobe() {
+  const { user } = useUserContext();
   const { items, setItems } = useWardrobeContext();
+
   const [newItem, setNewItem] = useState<WardrobeItem>(DEFAULT_ITEM);
   const [loading, setLoading] = useState(false);
   const [report, setReport] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // load existing from Firebase
+  // ─── Load existing from Firebase
   useEffect(() => {
     (async () => {
       try {
-        const snap = await getData('users/testUser123/wardrobe');
+        const snap = await getData(`users/${user.id}/wardrobe`);
         const saved: Record<GearCategory, string[]> = snap.val() || {};
         const loaded: WardrobeItem[] = [];
         categories.forEach((cat) => {
@@ -72,36 +81,57 @@ export default function Wardrobe() {
         });
         setItems(loaded);
       } catch {
-        /* ignore */
+        /* ignore load errors */
       }
     })();
-  }, [setItems]);
+  }, [user.id, setItems]);
 
-  const handleAdd = () => {
+  // ─── Add new item (in-memory + persist)
+  const handleAdd = async () => {
     const name = newItem.name.trim();
-    if (!name) return;
-    setItems((prev) => [...prev, newItem]);
-    setNewItem({ ...DEFAULT_ITEM });
+    if (!name || !newItem.category) return;
+
+    const updated = [...items, newItem];
+    setItems(updated);
+    setNewItem(DEFAULT_ITEM);
+
+    try {
+      const toSave: Record<GearCategory, string[]> = {};
+      updated.forEach((it) => {
+        toSave[it.category] = toSave[it.category] || [];
+        toSave[it.category].push(it.name);
+      });
+      await setData(`users/${user.id}/wardrobe`, toSave);
+    } catch (err) {
+      console.error('Failed to save wardrobe:', err);
+    }
   };
 
   const updateItem = (
     index: number,
-    updates: Partial<Pick<WardrobeItem, 'category' | 'warmth'>>,
+    updates: Partial<Pick<WardrobeItem, 'category' | 'warmth'>>
   ) => {
-    setItems((prev) => prev.map((it, i) => (i === index ? { ...it, ...updates } : it)));
+    const modified = items.map((it, i) =>
+      i === index ? { ...it, ...updates } : it
+    );
+    setItems(modified);
+    // optionally persist here as well
   };
 
   const removeItem = (index: number) => {
-    setItems((prev) => prev.filter((_, i) => i !== index));
+    const filtered = items.filter((_, i) => i !== index);
+    setItems(filtered);
+    // optionally persist here as well
   };
 
+  // ─── Generate AI report
   const handleGenerateReport = async () => {
     setLoading(true);
     setReport(null);
     setError(null);
     try {
       const text = await fetchPackingReport(items);
-      setReport(text.trim());
+      setReport(text);
     } catch (err) {
       console.error(err);
       setError('Failed to generate report.');
@@ -112,25 +142,20 @@ export default function Wardrobe() {
 
   return (
     <div className="wardrobe-page">
-      {/* ─── Add new item */}
+      {/* ─── Add New Item */}
       <div className="wardrobe-input">
-        <input
-          type="text"
-          placeholder="Item Name"
-          maxLength={MAX_INPUT}
-          value={newItem.name}
-          onChange={(e) => setNewItem((prev) => ({ ...prev, name: e.target.value }))}
-        />
-
+        <h3>Add New Gear</h3>
         <select
           value={newItem.category}
           onChange={(e) =>
             setNewItem((prev) => ({
               ...prev,
               category: e.target.value as GearCategory,
+              name: '',
             }))
           }
         >
+          <option value="">Select Category</option>
           {categories.map((cat) => (
             <option key={cat} value={cat}>
               {cat}
@@ -138,34 +163,49 @@ export default function Wardrobe() {
           ))}
         </select>
 
-        <div className="slider-wrapper">
-          <label htmlFor="warmth">Warmth Level (1–5)</label>
-          <input
-            type="range"
-            id="warmth"
-            min={1}
-            max={5}
-            step={1}
-            value={newItem.warmth}
+        {newItem.category && (
+          <select
+            value={newItem.name}
             onChange={(e) =>
-              setNewItem((prev) => ({
-                ...prev,
-                warmth: Number(e.target.value),
-              }))
+              setNewItem((prev) => ({ ...prev, name: e.target.value }))
             }
-          />
-        </div>
+          >
+            <option value="">Select Item</option>
+            {gearOptions[newItem.category].map((gear) => (
+              <option key={gear} value={gear}>
+                {gear}
+              </option>
+            ))}
+          </select>
+        )}
 
-        <button onClick={handleAdd}>Add</button>
+        <label htmlFor="warmth">Warmth (1–5)</label>
+        <input
+          id="warmth"
+          type="range"
+          min={1}
+          max={5}
+          step={1}
+          value={newItem.warmth}
+          onChange={(e) =>
+            setNewItem((prev) => ({ ...prev, warmth: Number(e.target.value) }))
+          }
+        />
+
+        <button
+          onClick={handleAdd}
+          disabled={!newItem.category || !newItem.name}
+        >
+          Add to Wardrobe
+        </button>
       </div>
 
       {/* ─── Inventory */}
       <div className="inventory-section">
-        <h3>Inventory</h3>
+        <h3>Your Gear</h3>
         {items.map((item, idx) => (
           <div className="inventory-item" key={idx}>
-            <input type="text" value={item.name} readOnly />
-
+            <span>{item.name}</span>
             <select
               value={item.category}
               onChange={(e) =>
@@ -178,19 +218,18 @@ export default function Wardrobe() {
                 </option>
               ))}
             </select>
-
             <input
               type="number"
               min={1}
               max={5}
               value={item.warmth}
-              onChange={(e) => updateItem(idx, { warmth: Number(e.target.value) })}
+              onChange={(e) =>
+                updateItem(idx, { warmth: Number(e.target.value) })
+              }
             />
-
             <button
               className="remove-button"
               onClick={() => removeItem(idx)}
-              aria-label="Remove item"
             >
               ×
             </button>
@@ -198,7 +237,7 @@ export default function Wardrobe() {
         ))}
       </div>
 
-      {/* ─── Generate report */}
+      {/* ─── Generate Packing Report */}
       <button
         className="generate-button"
         onClick={handleGenerateReport}

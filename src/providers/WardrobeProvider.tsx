@@ -1,5 +1,8 @@
-import { createContext, PropsWithChildren, useContext, useState } from 'react';
+import { getDatabase, onValue, ref } from 'firebase/database';
+import { createContext, PropsWithChildren, useContext, useEffect, useState } from 'react';
 import { WardrobeItem } from 'src/types/WardrobeItem';
+
+import { useUserContext } from './UserProvider';
 
 type WardrobeContextValue = {
   items: WardrobeItem[];
@@ -20,6 +23,19 @@ const useWardrobeContext = () => {
 
 const WardrobeContextProvider = (props: PropsWithChildren) => {
   const [items, setItems] = useState<WardrobeItem[]>([]);
+  const { user } = useUserContext();
+
+  useEffect(() => {
+    const unsubscribe = onValue(
+      ref(getDatabase(), `/wardrobes/${user?.uid}`),
+      (snapshot) => {
+        const databaseItems: WardrobeItem[] = snapshot.val();
+        setItems(databaseItems ?? []);
+      },
+    );
+
+    return () => unsubscribe();
+  }, [setItems, user?.uid]);
 
   return (
     <WardrobeContext.Provider value={{ items, setItems }}>

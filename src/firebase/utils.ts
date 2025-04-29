@@ -1,6 +1,7 @@
 import 'firebase/database';
 
 import { initializeApp } from 'firebase/app';
+import { getAuth } from 'firebase/auth';
 import { get, getDatabase, push, ref, set, update } from 'firebase/database';
 
 const firebaseConfig = {
@@ -13,7 +14,8 @@ const firebaseConfig = {
   appId: '1:266068817759:web:8225bd63e9e121dff568ea',
 };
 
-initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 
 const setData = async (path: string, data: unknown) => {
   await set(ref(getDatabase(), path), data);
@@ -36,34 +38,47 @@ const saveViewedLocation = async (userId: string, location: string) => {
     const locationsObj = snapshot.val();
     const locations = Object.values(locationsObj) as string[];
 
-    const alreadyViewed = locations.some(
-      (loc) => loc.trim().toLowerCase() === location.trim().toLowerCase(),
-    );
+// ─── in src/firebase/utils.ts (or wherever this lives) ───
 
-    if (alreadyViewed) {
-      console.log('Location already viewed, skipping save.');
-      return;
-    }
+// (any imports you already have above)
+// e.g. import { app, auth } from './firebaseConfig';
+// import { getData, pushData, setData, updateData } from './db';
+
+const saveViewedLocation = async (
+  userId: string,
+  location: string
+): Promise<void> => {
+  const path = `users/${userId}/viewedLocations`;
+  const locations = await fetchViewedLocations(userId);
+
+  const alreadyViewed = locations.some(
+    (loc) => loc.trim().toLowerCase() === location.trim().toLowerCase()
+  );
+  if (alreadyViewed) {
+    console.log('Location already viewed, skipping save.');
+    return;
   }
 
   await pushData(path, location);
 };
+
 const fetchViewedLocations = async (userId: string): Promise<string[]> => {
   const path = `users/${userId}/viewedLocations`;
   const snapshot = await getData(path);
   if (snapshot.exists()) {
     const locationsObj = snapshot.val();
-    const locations = Object.values(locationsObj) as string[];
-    return locations;
+    return Object.values(locationsObj) as string[];
   }
   return [];
 };
 
 export {
-  fetchViewedLocations,
+  app,
+  auth,
   getData,
   pushData,
-  saveViewedLocation,
   setData,
   updateData,
+  fetchViewedLocations,
+  saveViewedLocation,
 };
