@@ -32,7 +32,7 @@ const pushData = async (path: string, data?: unknown) => {
   await push(ref(getDatabase(), path), data);
 };
 const saveViewedLocation = async (userId: string, location: string) => {
-  const path = `users/${userId}/viewedLocations`;
+  const path = `viewedLocations/${userId}`;
   const snapshot = await getData(path);
   if (snapshot.exists()) {
     const locationsObj = snapshot.val();
@@ -51,7 +51,7 @@ const saveViewedLocation = async (userId: string, location: string) => {
   await pushData(path, location);
 };
 const fetchViewedLocations = async (userId: string): Promise<string[]> => {
-  const path = `users/${userId}/viewedLocations`;
+  const path = `viewedLocations/${userId}`;
   const snapshot = await getData(path);
   if (snapshot.exists()) {
     const locationsObj = snapshot.val();

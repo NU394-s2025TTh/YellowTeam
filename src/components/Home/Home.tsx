@@ -1,28 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useUserContext } from 'src/providers/UserProvider';
 
 import { fetchViewedLocations } from '../../firebase/utils';
 
 const Home: React.FC = () => {
-  const { user } = useUserContext();
-  const uid = user?.uid;
-
   const navigate = useNavigate();
   const [viewedLocations, setViewedLocations] = useState<string[]>([]);
   useEffect(() => {
-    if (!uid) return;
-
-    (async () => {
+    const loadViewedLocations = async () => {
       try {
-        const locs = await fetchViewedLocations(uid);
-        locs.reverse();
-        setViewedLocations(locs.slice(0, 4));
-      } catch (e) {
-        console.error(e);
+        const locations = await fetchViewedLocations('testUser123');
+        locations.reverse();
+        const topFourLocations = locations.slice(0, 4);
+        setViewedLocations(topFourLocations);
+      } catch (error) {
+        console.error('Failed to load viewed locations:', error);
       }
-    })();
-  }, [uid]);
+    };
+
+    loadViewedLocations();
+  }, []);
 
   return (
     <div style={{ textAlign: 'center', padding: '2rem' }}>

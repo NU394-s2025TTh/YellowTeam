@@ -5,9 +5,9 @@ import {
   getHourlyForecast,
   getSnowConditions,
 } from 'src/api/snowApi';
-import { useUserContext } from 'src/providers/UserProvider';
 import { useWardrobeContext } from 'src/providers/WardrobeProvider';
 
+import { getCurrentUser } from '../../firebase/user';
 import { saveViewedLocation } from '../../firebase/utils';
 import type { Forecast } from '../../types/Forecast';
 import { FiveDayForecast } from '../FiveDayForecast/FiveDayForecast';
@@ -28,7 +28,6 @@ type SnowConditionData = {
 
 const SearchPage: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useUserContext();
   const { items } = useWardrobeContext();
 
   const [location, setLocation] = useState('');
@@ -78,8 +77,13 @@ const SearchPage: React.FC = () => {
         lastSnowfallDate: snow.lastSnowfallDate || 'N/A',
         url: snow.basicInfo?.url || '#',
       });
-      if (!user || !user.uid) throw new Error('No user to save viewed location');
-      await saveViewedLocation(user.uid, snow.basicInfo?.name || q);
+      const user = getCurrentUser();
+      // await saveViewedLocation('testUser123', snow.basicInfo?.name || q);
+      if (user) {
+        await saveViewedLocation(user.uid, snow.basicInfo?.name || q);
+      } else {
+        console.warn('No user signed in, skipping saveViewedLocation.');
+      }
       setForecastList(hours);
       setFiveDayForecast(days);
 
