@@ -5,8 +5,10 @@ import {
   getHourlyForecast,
   getSnowConditions,
 } from 'src/api/snowApi';
+import { useUserContext } from 'src/providers/UserProvider';
+import { useWardrobeContext } from 'src/providers/WardrobeProvider';
 
-import { getData, saveViewedLocation } from '../../firebase/utils';
+import { saveViewedLocation } from '../../firebase/utils';
 import type { Forecast } from '../../types/Forecast';
 import { FiveDayForecast } from '../FiveDayForecast/FiveDayForecast';
 import HourlyForecast from '../HourlyForecast/HourlyForecast';
@@ -26,6 +28,8 @@ type SnowConditionData = {
 
 const SearchPage: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useUserContext();
+  const { items } = useWardrobeContext();
 
   const [location, setLocation] = useState('');
   const [resortData, setResortData] = useState<SnowConditionData | null>(null);
@@ -74,13 +78,11 @@ const SearchPage: React.FC = () => {
         lastSnowfallDate: snow.lastSnowfallDate || 'N/A',
         url: snow.basicInfo?.url || '#',
       });
-      await saveViewedLocation('testUser123', snow.basicInfo?.name || q);
+      if (!user || !user.uid) throw new Error('No user to save viewed location');
+      await saveViewedLocation(user.uid, snow.basicInfo?.name || q);
       setForecastList(hours);
       setFiveDayForecast(days);
 
-      const snap = await getData('users/testUser123/wardrobe');
-      const arrs: string[][] = Object.values(snap.val() || {});
-      const owned = new Set(arrs.flat().map((s) => s.toLowerCase()));
       const defaultList = [
         'Warm waterproof jacket',
         'Snow pants',
@@ -91,9 +93,10 @@ const SearchPage: React.FC = () => {
         'Helmet',
         'Sunscreen (yes, even in the snow!)',
       ];
+      const masterList = items.length > 0 ? items.map((i) => i.name) : defaultList;
       const checks: Record<string, boolean> = {};
-      defaultList.forEach((item) => {
-        checks[item] = owned.has(item.toLowerCase());
+      masterList.forEach((name) => {
+        checks[name] = false;
       });
       setGearChecked(checks);
     } catch (err) {

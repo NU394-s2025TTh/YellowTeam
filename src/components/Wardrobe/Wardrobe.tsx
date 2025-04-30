@@ -45,8 +45,6 @@ async function fetchPackingReport(items: WardrobeItem[]): Promise<string> {
     ],
   };
 
-  console.log('OPENAI KEY:', import.meta.env.VITE_OPENAI_KEY);
-
   const res = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
