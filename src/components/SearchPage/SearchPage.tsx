@@ -78,7 +78,6 @@ const SearchPage: React.FC = () => {
         url: snow.basicInfo?.url || '#',
       });
       const user = getCurrentUser();
-      // await saveViewedLocation('testUser123', snow.basicInfo?.name || q);
       if (user) {
         await saveViewedLocation(user.uid, snow.basicInfo?.name || q);
       } else {

@@ -2,14 +2,20 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { fetchViewedLocations } from '../../firebase/utils';
+import { getCurrentUser } from '../../firebase/user';
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
   const [viewedLocations, setViewedLocations] = useState<string[]>([]);
+  const user = getCurrentUser();
+  if (!user) {
+    console.error('No user is logged in!');
+    return;
+  }
   useEffect(() => {
     const loadViewedLocations = async () => {
       try {
-        const locations = await fetchViewedLocations('testUser123');
+        const locations = await fetchViewedLocations(user.uid);
         locations.reverse();
         const topFourLocations = locations.slice(0, 4);
         setViewedLocations(topFourLocations);
